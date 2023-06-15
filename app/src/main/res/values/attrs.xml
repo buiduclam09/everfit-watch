@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <declare-styleable name="AppButton">
+        <attr name="ab_title" format="string" />
+        <attr name="ab_textColor" format="color" />
+        <attr name="ab_isEnable" format="boolean" />
+    </declare-styleable>
+
+    <declare-styleable name="CategoryButton">
+        <attr name="cb_title" format="string" />
+        <attr name="cb_icon" format="reference" />
+    </declare-styleable>
+
+    <declare-styleable name="AppToolbar">
+        <attr name="at_title" format="string" />
+        <attr name="at_isShowBackButton" format="boolean" />
+    </declare-styleable>
+
+
+</resources>

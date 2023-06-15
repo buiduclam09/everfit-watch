@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="purple_200">#FFBB86FC</color>
+    <color name="purple_500">#FF6200EE</color>
+    <color name="purple_700">#FF3700B3</color>
+    <color name="teal_200">#FF03DAC5</color>
+    <color name="teal_700">#FF018786</color>
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+    <color name="white10">#1AFFFFFF</color>
+    <color name="purple">#7470EF</color>
+    <color name="gray">#D7D8DD</color>
+    <color name="gray_7A7C89">#7A7C89</color>
+    <color name="background">#F5F8FF</color>
+    <color name="C_7A7C89">#7A7C89</color>
+    <color name="C_232530">#232530</color>
+    <color name="C_EEF1F5">#EEF1F5</color>
+    <color name="C_616269">#616269</color>
+    <color name="line">#DEE2EC</color>
+    <color name="text">#232530</color>
+    <color name="transparent">#00000000</color>
+    <color name="C_B2B3C2">#B2B3C2</color>
+    <color name="color_F7F8FC">#F7F8FC</color>
+    <color name="sign_up_button_background_color">#F5F6FB</color>
+    <color name="whiteE5">#F6F7F9</color>
+    <color name="color_bac2cc">#BAC2CC</color>
+    <color name="color_dee2e6">#DEE2E6</color>
+    <color name="color_33ffbc39">#33FFBC39</color>
+    <color name="color_EEEFF2">#EEEFF2</color>
+    <color name="color_hint_common">#797E91</color>
+    <color name="color_22d85c">#22d85c</color>
+</resources>

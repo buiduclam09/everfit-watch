@@ -1,0 +1,19 @@
+<resources>
+    <string name="app_name">Wear-everfit</string>
+    <string name="completed">Completed</string>
+    <string name="missed">Missed</string>
+    <string name="assigned">Assigned</string>
+    <plurals name="exercise">
+        <item quantity="one">%d exercise</item>
+        <item quantity="other">%d exercises</item>
+    </plurals>
+    <string name="dose_rate">Dose rate:</string>
+    <string name="total_dose">Total dose:</string>
+    <string name="heart_rate">Heart rate:</string>
+    <string name="temperature">Temperature:</string>
+    <string name="text_saturation">O2 Saturation:</string>
+    <string name="connect_waer">Connect Wear</string>
+    <string name="not_support_bluetooth">Not support bluetooth</string>
+    <string name="your_watch_isn_t_connected_to_your_phone">Your watch isn\'t connected to your phone</string>
+    <string name="connect">Connect</string>
+</resources>
