@@ -12,6 +12,6 @@ dependencyResolutionManagement {
         mavenCentral()
     }
 }
-rootProject.name = "Demo - Wear"
+rootProject.name = "Demo-Wear"
 include ':app'
 include ':everfit-wear'
