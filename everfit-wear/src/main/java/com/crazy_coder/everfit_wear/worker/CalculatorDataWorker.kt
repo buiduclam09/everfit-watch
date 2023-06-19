@@ -123,14 +123,16 @@ class CalculatorDataWorker @AssistedInject constructor(
 
     override suspend fun doWork(): Result {
         runBlocking {
+            Wearable.getNodeClient(appContext).connectedNodes.addOnSuccessListener { nodes ->
+                if (nodes.isNotEmpty()) {
+                    listNodes.clear()
+                    listNodes.addAll(nodes)
+
+                }
+            }
             (1..7).forEach { _ ->
                 Log.d("####", "Work")
                 startMeasure()
-//                    if (nodes.isNotEmpty()) {
-//                        listNodes.clear()
-//                        listNodes.addAll(nodes)
-//
-//                    }
                 delay(2 * 60 * 1000)
             }
         }
