@@ -2,6 +2,7 @@ package com.crazy_coder.everfit_wear.presentation
 
 import android.Manifest
 import android.content.pm.PackageManager
+import android.hardware.Sensor
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
@@ -38,12 +39,21 @@ import com.crazy_coder.everfit_wear.R
 import com.crazy_coder.everfit_wear.presentation.theme.WearOSTeamKoderTheme
 import com.crazy_coder.everfit_wear.service.StartupReceiver.Companion.PERMISSION
 import com.crazy_coder.everfit_wear.utils.startWorker
+import com.google.android.gms.wearable.MessageClient
+import com.google.android.gms.wearable.Wearable
 import dagger.hilt.android.AndroidEntryPoint
 
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     private val viewModel by viewModels<MainViewModel>()
+    private val eventListenMessage: MessageClient.OnMessageReceivedListener by lazy {
+        MessageClient.OnMessageReceivedListener {
+            String(it.data).let {
+                Toast.makeText(this, "From phone: $it", Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -58,6 +68,16 @@ class MainActivity : ComponentActivity() {
         setContent {
             WearApp(viewModel)
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        Wearable.getMessageClient(this).addListener(eventListenMessage)
+    }
+
+    override fun onPause() {
+        Wearable.getMessageClient(this).removeListener(eventListenMessage)
+        super.onPause()
     }
 }
 
