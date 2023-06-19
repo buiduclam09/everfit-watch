@@ -7,11 +7,11 @@ plugins {
 }
 
 android {
-    namespace 'com.lambui.everfit-wear'
+    namespace 'com.crazy_coder.everfit_wear'
     compileSdk 33
 
     defaultConfig {
-        applicationId "com.lambui.everfit-wear"
+        applicationId "com.crazy_coder.everfit_wear"
         minSdk 24
         targetSdk 33
         versionCode 1
