@@ -11,6 +11,8 @@
     <string name="total_dose">Total dose:</string>
     <string name="heart_rate">Heart rate:</string>
     <string name="temperature">Temperature:</string>
+    <string name="step">Steps:</string>
+    <string name="calories">Calories Daily:</string>
     <string name="text_saturation">O2 Saturation:</string>
     <string name="connect_waer">Connect Wear</string>
     <string name="not_support_bluetooth">Not support bluetooth</string>

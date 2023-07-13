@@ -4,6 +4,7 @@ import android.Manifest
 import android.content.pm.PackageManager
 import android.hardware.Sensor
 import android.os.Bundle
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -39,8 +40,10 @@ import com.crazy_coder.everfit_wear.R
 import com.crazy_coder.everfit_wear.presentation.theme.WearOSTeamKoderTheme
 import com.crazy_coder.everfit_wear.service.StartupReceiver.Companion.PERMISSION
 import com.crazy_coder.everfit_wear.utils.startWorker
+import com.google.android.gms.tasks.OnCompleteListener
 import com.google.android.gms.wearable.MessageClient
 import com.google.android.gms.wearable.Wearable
+import com.google.firebase.messaging.FirebaseMessaging
 import dagger.hilt.android.AndroidEntryPoint
 
 
@@ -57,6 +60,16 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        FirebaseMessaging.getInstance().token.addOnCompleteListener(OnCompleteListener { task ->
+            if (!task.isSuccessful) {
+                return@OnCompleteListener
+            }
+
+            // Get new FCM registration token
+            Toast.makeText(this@MainActivity, "${task.result}",Toast.LENGTH_LONG).show()
+            Log.d("####", "${task.result}")
+
+        })
         viewModel.permissionLauncher = registerForActivityResult(
             ActivityResultContracts.RequestPermission()
         ) { result ->

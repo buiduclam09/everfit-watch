@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/whiteE5">
@@ -28,6 +27,7 @@
                 android:id="@+id/clContainerInforWatch"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginBottom="@dimen/dp_16"
                 android:visibility="visible">
 
                 <TextView
@@ -55,6 +55,30 @@
                     app:layout_constraintTop_toBottomOf="@id/tv_title_heart_rate" />
 
                 <TextView
+                    android:id="@+id/tvSteps"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginHorizontal="@dimen/dp_16"
+                    android:layout_marginTop="@dimen/dp_8"
+                    android:text="@string/step"
+                    android:textColor="@color/gray_7A7C89"
+                    android:textSize="@dimen/sp_14"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/tv_title_temperature" />
+
+                <TextView
+                    android:id="@+id/tvCalories"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginHorizontal="@dimen/dp_16"
+                    android:layout_marginTop="@dimen/dp_8"
+                    android:text="@string/calories"
+                    android:textColor="@color/gray_7A7C89"
+                    android:textSize="@dimen/sp_14"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/tvSteps" />
+
+                <TextView
                     android:id="@+id/tv_heart_rate"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -77,13 +101,38 @@
                     android:textSize="@dimen/sp_14"
                     app:layout_constraintStart_toEndOf="@id/tv_title_temperature"
                     app:layout_constraintTop_toBottomOf="@id/tv_title_heart_rate" />
+
+                <TextView
+                    android:id="@+id/tvNumSteps"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginHorizontal="@dimen/dp_10"
+                    android:layout_marginTop="@dimen/dp_8"
+                    android:text="0"
+                    android:textColor="@color/black"
+                    android:textSize="@dimen/sp_14"
+                    app:layout_constraintStart_toEndOf="@id/tvSteps"
+                    app:layout_constraintTop_toBottomOf="@id/tv_temperature" />
+
+                <TextView
+                    android:id="@+id/tvCaloriesValue"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginHorizontal="@dimen/dp_10"
+                    android:layout_marginTop="@dimen/dp_8"
+                    android:text="0"
+                    android:textColor="@color/black"
+                    android:textSize="@dimen/sp_14"
+                    app:layout_constraintStart_toEndOf="@id/tvCalories"
+                    app:layout_constraintTop_toBottomOf="@id/tvNumSteps" />
             </androidx.constraintlayout.widget.ConstraintLayout>
 
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:id="@+id/cl_container_connect_watch"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:visibility="visible">
+                android:layout_marginTop="@dimen/dp_16"
+                android:visibility="gone">
 
                 <TextView
                     android:id="@+id/tvWaring"
@@ -112,7 +161,7 @@
                 android:id="@+id/cl_send_mess"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:visibility="gone">
+                android:visibility="visible">
 
                 <androidx.appcompat.widget.AppCompatEditText
                     android:id="@+id/edt_message"

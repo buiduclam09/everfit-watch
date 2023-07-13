@@ -3,6 +3,7 @@ plugins {
     id 'org.jetbrains.kotlin.android'
     id 'dagger.hilt.android.plugin'
     id 'kotlin-kapt'
+    id 'com.google.gms.google-services'
 }
 
 android {
@@ -90,8 +91,11 @@ dependencies {
 
     // Health Services
     implementation 'androidx.health:health-services-client:1.0.0-beta03'
+    implementation platform('com.google.firebase:firebase-bom:31.2.1')
+    implementation 'com.google.firebase:firebase-messaging-ktx:23.1.1'
 
     //wearable
     implementation 'androidx.wear:wear:1.2.0'
     compileOnly 'com.google.android.wearable:wearable:2.9.0'
 }
+apply plugin: 'com.google.gms.google-services'
