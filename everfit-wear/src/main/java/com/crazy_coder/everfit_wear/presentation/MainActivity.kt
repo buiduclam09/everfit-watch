@@ -154,7 +154,7 @@ fun WearApp(viewModel: MainViewModel) {
                         Spacer(modifier = Modifier.width(10.dp))
                         Text(
                             modifier = Modifier
-                                .padding(horizontal = 8.dp)
+                                .padding(horizontal = 8.dp),
                             text = viewModel.state.value.token
                         )
                     }
