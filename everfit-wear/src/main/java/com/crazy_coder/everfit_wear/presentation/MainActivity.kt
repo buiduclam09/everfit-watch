@@ -67,7 +67,7 @@ class MainActivity : ComponentActivity() {
 
             // Get new FCM registration token
             Toast.makeText(this@MainActivity, "${task.result}", Toast.LENGTH_LONG).show()
-            Log.d("####", "${task.result}")
+            Log.e("AAAAAAAAAAAAA", "${task.result}")
             task.result?.let {
                 viewModel.updateToken(it)
             }

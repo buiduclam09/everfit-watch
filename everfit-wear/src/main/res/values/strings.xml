@@ -9,5 +9,8 @@
     <string name="title_activity_presentation._main">presentation.MainActivity</string>
     <string name="title_activity_main">MainActivity</string>
     <string name="complication_label">Example complication</string>
-    <string name="default_notification_channel_id">everfit_wearos_id</string>
+    <string name="default_notification_channel_id">default_notification_channel_id</string>
+    <string name="notification_message_channel_id">notification_message_channel_id</string>
+    <string name="notification_message_channel_name">notification_message_channel_name</string>
+    <string name="notification_message_channel_description">notification_message_channel_description</string>
 </resources>
