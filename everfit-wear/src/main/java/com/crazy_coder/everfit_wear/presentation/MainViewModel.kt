@@ -36,12 +36,17 @@ class MainViewModel @Inject constructor(
         _state.value = state.value.copy(showButtonRequest = !isGrant)
     }
 
+    fun updateToken(token: String) {
+        _state.value = state.value.copy(token = token)
+    }
+
     companion object {
         data class MainState(
             val heartRate: String = "0.0",
             val temperature: String = "0.0",
             val showButtonRequest: Boolean = true,
-            val step: String = "0"
+            val step: String = "0",
+            val token: String = ""
         )
     }
 }

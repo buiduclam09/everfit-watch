@@ -2,7 +2,6 @@ package com.crazy_coder.everfit_wear.presentation
 
 import android.Manifest
 import android.content.pm.PackageManager
-import android.hardware.Sensor
 import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
@@ -21,6 +20,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.verticalScroll
@@ -66,9 +66,11 @@ class MainActivity : ComponentActivity() {
             }
 
             // Get new FCM registration token
-            Toast.makeText(this@MainActivity, "${task.result}",Toast.LENGTH_LONG).show()
+            Toast.makeText(this@MainActivity, "${task.result}", Toast.LENGTH_LONG).show()
             Log.d("####", "${task.result}")
-
+            task.result?.let {
+                viewModel.updateToken(it)
+            }
         })
         viewModel.permissionLauncher = registerForActivityResult(
             ActivityResultContracts.RequestPermission()
@@ -145,6 +147,15 @@ fun WearApp(viewModel: MainViewModel) {
                         Text(
                             modifier = Modifier.padding(horizontal = 8.dp),
                             text = viewModel.state.value.step
+                        )
+                    }
+
+                    Row {
+                        Spacer(modifier = Modifier.width(10.dp))
+                        Text(
+                            modifier = Modifier
+                                .padding(horizontal = 8.dp)
+                            text = viewModel.state.value.token
                         )
                     }
                 }
