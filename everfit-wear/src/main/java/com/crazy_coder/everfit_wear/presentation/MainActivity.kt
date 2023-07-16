@@ -1,15 +1,8 @@
 package com.crazy_coder.everfit_wear.presentation
 
 import android.Manifest
-import android.app.NotificationChannel
-import android.app.NotificationManager
-import android.app.PendingIntent
-import android.content.Context
-import android.content.Intent
 import android.content.pm.PackageManager
-import android.os.Build
 import android.os.Bundle
-import android.provider.Settings.Global.getString
 import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
@@ -40,10 +33,6 @@ import androidx.compose.ui.unit.ExperimentalUnitApi
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.TextUnitType
 import androidx.compose.ui.unit.dp
-import androidx.core.app.ActivityCompat
-import androidx.core.app.NotificationCompat
-import androidx.core.app.NotificationCompat.WearableExtender
-import androidx.core.app.NotificationManagerCompat
 import androidx.wear.compose.material.Button
 import androidx.wear.compose.material.Card
 import androidx.wear.compose.material.MaterialTheme
@@ -63,6 +52,7 @@ import dagger.hilt.android.AndroidEntryPoint
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     private val viewModel by viewModels<MainViewModel>()
+    private val notification by lazy { AppNotificationManager(applicationContext) }
     private val eventListenMessage: MessageClient.OnMessageReceivedListener by lazy {
         MessageClient.OnMessageReceivedListener {
             String(it.data).let {
@@ -79,7 +69,6 @@ class MainActivity : ComponentActivity() {
             }
 
             // Get new FCM registration token
-            Toast.makeText(this@MainActivity, "${task.result}", Toast.LENGTH_LONG).show()
             Log.e("AAAAAAAAAAAAA", "${task.result}")
             task.result?.let {
                 viewModel.updateToken(it)
@@ -94,7 +83,7 @@ class MainActivity : ComponentActivity() {
         runCatching { startWorker() }
         viewModel.updateStatusPermission(checkSelfPermission(PERMISSION) == PackageManager.PERMISSION_GRANTED)
         setContent {
-            WearApp(viewModel, this)
+            WearApp(viewModel, notification)
         }
     }
 
@@ -111,7 +100,7 @@ class MainActivity : ComponentActivity() {
 
 
 @Composable
-fun WearApp(viewModel: MainViewModel, context: Context) {
+fun WearApp(viewModel: MainViewModel, notification: AppNotificationManager) {
     WearOSTeamKoderTheme {
         Column(
             modifier = Modifier
@@ -165,33 +154,20 @@ fun WearApp(viewModel: MainViewModel, context: Context) {
                     Row {
                         Spacer(modifier = Modifier.width(10.dp))
                         Button(onClick = {
-                            Toast.makeText(context, "CLICK CLICK", Toast.LENGTH_LONG).show()
-                            //your onclick code here
-                            val appNotificationManager = AppNotificationManager(context)
-                            appNotificationManager.showNotification("asfasdfadsdsad")
-                            val test = NotificationCompat.Builder(
-                                context,
-                                context.getString(R.string.default_notification_channel_id)
-                            )
-                                .setAutoCancel(false)
-                                .setOngoing(true)
-                                .setSmallIcon(R.drawable.ic_app_notification)
-                                .setContentTitle(context.getString(R.string.app_name))
-                                .setContentText("asdfsdfas")
-                                .setPriority(NotificationCompat.PRIORITY_HIGH)
-                                .setDefaults(NotificationCompat.DEFAULT_ALL)
-                                .setSound(null)
-                                .setSilent(true)
-                                .setVibrate(null)
-                            val weartest = WearableExtender().run {
-                                extend(test).build()
-                            }
-                            context.getSystemService(NotificationManager::class.java).notify(
-                                500, weartest
-                            )
-
+                            notification.showNotification("Chao ae")
                         }) {
-                            Text(text = "Button")
+                            Text(
+                                modifier = Modifier.padding(horizontal = 8.dp),
+                                text = "Show"
+                            )
+                        }
+                        Button(onClick = {
+                            notification.cancelNotification()
+                        }) {
+                            Text(
+                                modifier = Modifier.padding(horizontal = 8.dp),
+                                text = "Hide"
+                            )
                         }
                     }
 
@@ -234,5 +210,3 @@ fun PermissionToggle(viewModel: MainViewModel) {
         }
     }
 }
-
-const val CHANNEL_ID = 100
