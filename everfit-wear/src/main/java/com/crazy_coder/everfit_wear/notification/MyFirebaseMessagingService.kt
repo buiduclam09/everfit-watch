@@ -25,11 +25,17 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
     private val notificationManager by lazy { NotificationManagerCompat.from(applicationContext) }
     override fun onNewToken(token: String) {
         super.onNewToken(token)
+        sendRegistrationToServer(token)
     }
 
     override fun onMessageReceived(message: RemoteMessage) {
         super.onMessageReceived(message)
         sendNotification(message)
+    }
+
+    private fun sendRegistrationToServer(token: String?) {
+        // TODO: Implement this method to send token to your app server.
+        Log.d("AAAAAAAAA", "sendRegistrationTokenToServer($token)")
     }
 
     private fun sendNotification(message: RemoteMessage) {
@@ -90,6 +96,10 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
             .setContentText(content)
             .setContentTitle(title)
             .setPriority(NotificationCompat.PRIORITY_HIGH)
+            .extend(
+                NotificationCompat.WearableExtender()
+                    .setBridgeTag("tagOne")
+            )
             .run(addBuilder)
             .build()
     }
