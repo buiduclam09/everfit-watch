@@ -47,7 +47,7 @@ class AppNotificationManager @Inject constructor(
     fun createNotification(contentText: String): Notification {
         fun createNotificationChannelIfAboveAndroidO() {
             NotificationChannel(
-                applicationContext.getString(R.string.notification_message_channel_id),
+                applicationContext.getString(R.string.default_notification_channel_id),
                 applicationContext.getString(R.string.notification_message_channel_name),
                 NotificationManager.IMPORTANCE_HIGH
             ).apply {
@@ -67,7 +67,7 @@ class AppNotificationManager @Inject constructor(
             applicationContext,
             applicationContext.getString(R.string.default_notification_channel_id)
         )
-            .setAutoCancel(false)
+            .setAutoCancel(true)
             .setOngoing(true)
             .setSmallIcon(R.drawable.ic_app_notification)
             .setContentTitle(applicationContext.getString(R.string.app_name))
