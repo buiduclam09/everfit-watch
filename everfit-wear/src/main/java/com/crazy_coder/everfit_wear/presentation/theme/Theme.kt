@@ -13,3 +13,14 @@ fun WearOSTeamKoderTheme(
         content = content
     )
 }
+@Composable
+fun ExerciseSampleTheme(
+    content: @Composable () -> Unit
+) {
+    MaterialTheme(
+        colors = wearColorPalette,
+        typography = Typography,
+        content = content
+    )
+}
+

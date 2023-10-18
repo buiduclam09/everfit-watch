@@ -7,7 +7,11 @@
     <uses-permission android:name="android.permission.BODY_SENSORS" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.ACTIVITY_RECOGNITION" />
-    <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.ACTIVITY_RECOGNITION" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
 
     <uses-feature android:name="android.hardware.type.watch" />
 
@@ -50,7 +54,7 @@
             android:value="true" />
 
         <activity
-            android:name="com.crazy_coder.everfit_wear.presentation.MainActivity"
+            android:name=".presentation.runworkout.RunWorkoutActivity"
             android:exported="true"
             android:theme="@android:style/Theme.DeviceDefault">
             <intent-filter>
@@ -60,7 +64,10 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".presentation.ResultActivity"
+            android:name=".presentation.result.ResultActivity"
+            android:exported="true" />
+        <activity
+            android:name=".presentation.MainActivity"
             android:exported="true" />
 
         <service
@@ -80,6 +87,11 @@
         <meta-data
             android:name="com.google.firebase.messaging.default_notification_channel_id"
             android:value="@string/default_notification_channel_id" />
+
+        <service
+            android:name=".service.ForegroundService"
+            android:exported="false"
+            android:foregroundServiceType="location" />
     </application>
 
 </manifest>

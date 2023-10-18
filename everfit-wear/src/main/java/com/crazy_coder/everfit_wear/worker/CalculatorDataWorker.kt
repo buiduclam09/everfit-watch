@@ -30,6 +30,7 @@ class CalculatorDataWorker @AssistedInject constructor(
     private var heartRateListener: SensorDataListener? = null
     private var temperatureListener: SensorDataListener? = null
     private var stepsListener: SensorDataListener? = null
+    private var spo2Listener: SpO2Listener? = null
 
     init {
         sensorManager = appContext.getSystemService(Context.SENSOR_SERVICE) as? SensorManager

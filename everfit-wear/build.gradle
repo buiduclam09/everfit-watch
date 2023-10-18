@@ -8,12 +8,12 @@ plugins {
 
 android {
     namespace 'com.crazy_coder.everfit_wear'
-    compileSdk 33
+    compileSdk 34
 
     defaultConfig {
         applicationId "com.crazy_coder.everfit_wear"
         minSdk 30
-        targetSdk 33
+        targetSdk 34
         versionCode 1
         versionName "1.0"
         vectorDrawables {
@@ -49,7 +49,7 @@ android {
 }
 
 dependencies {
-
+    implementation fileTree(dir: 'libs', include: '*.aar')
     implementation 'androidx.core:core-ktx:1.10.1'
     implementation platform('org.jetbrains.kotlin:kotlin-bom:1.8.0')
     implementation 'com.google.android.gms:play-services-wearable:18.0.0'
@@ -59,7 +59,7 @@ dependencies {
     implementation platform('androidx.compose:compose-bom:2022.10.00')
     implementation 'androidx.compose.ui:ui'
     implementation 'androidx.compose.ui:ui-tooling-preview'
-    implementation "androidx.wear.compose:compose-material:$wear_compose_version"
+    implementation 'androidx.wear.compose:compose-material:1.3.0-alpha07'
     implementation "androidx.wear.compose:compose-foundation:$wear_compose_version"
     implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.6.1'
     implementation 'androidx.activity:activity-compose:1.7.2'
@@ -82,20 +82,40 @@ dependencies {
     // DataStore
     implementation 'androidx.datastore:datastore-preferences:1.0.0'
 
+    //navigation
+    implementation 'androidx.navigation:navigation-compose:2.5.3'
+    implementation 'androidx.wear.compose:compose-navigation:1.2.0-alpha02'
+    //lifecycle
+    implementation 'androidx.lifecycle:lifecycle-runtime-compose:2.6.0-alpha04'
+
     // WorkManager
     implementation 'androidx.work:work-runtime:2.8.1'
     implementation 'androidx.work:work-runtime-ktx:2.8.1'
+    implementation 'androidx.concurrent:concurrent-futures-ktx:1.1.0'
 
     //Flow
-    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.4"
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.1"
+    // TODO: Review dependencies for Ongoing Activity.
+    implementation "androidx.wear:wear-ongoing:1.1.0-alpha01"
+    // Includes LocusIdCompat and new Notification categories for Ongoing Activity.
+    implementation "androidx.core:core-ktx:1.6.0"
+    implementation "androidx.hilt:hilt-navigation-compose:1.0.0"
 
     // Health Services
-    implementation 'androidx.health:health-services-client:1.0.0-beta03'
+    implementation 'androidx.health:health-services-client:1.1.0-alpha01'
     implementation platform('com.google.firebase:firebase-bom:31.2.1')
-    implementation 'com.google.firebase:firebase-messaging-ktx:23.1.1'
+    implementation 'com.google.firebase:firebase-messaging-ktx:23.2.1'
+//    implementation 'androidx.compose.material:material:1.4.1'
+//    implementation 'androidx.compose.material3:material3:1.0.1'
+    implementation 'androidx.compose.material3:material3:1.0.0-beta03'
+    implementation 'com.google.android.material:material:1.8.0-alpha01'
+    implementation "com.google.guava:guava:31.0.1-android"
+
+
+    // Foundation is additive, so you can use the mobile version in your Wear OS app.
 
     //wearable
-    implementation 'androidx.wear:wear:1.2.0'
+    implementation 'androidx.wear:wear:1.3.0'
     compileOnly 'com.google.android.wearable:wearable:2.9.0'
 }
 apply plugin: 'com.google.gms.google-services'
