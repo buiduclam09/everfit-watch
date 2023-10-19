@@ -15,6 +15,8 @@
  */
 package com.crazy_coder.everfit_wear.presentation.runworkout
 
+import android.util.Log
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.focusable
 import androidx.compose.foundation.gestures.scrollBy
@@ -31,10 +33,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.input.rotary.onRotaryScrollEvent
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.health.services.client.data.DataType
 import androidx.wear.compose.material.Button
 import androidx.wear.compose.material.ListHeader
 import androidx.wear.compose.material.MaterialTheme
@@ -48,6 +52,9 @@ import androidx.wear.compose.material.rememberScalingLazyListState
 import com.crazy_coder.everfit_wear.R
 import com.crazy_coder.everfit_wear.presentation.component.SummaryFormat
 import com.crazy_coder.everfit_wear.presentation.theme.ExerciseSampleTheme
+import com.crazy_coder.everfit_wear.utils.Constants
+import com.crazy_coder.everfit_wear.utils.Constants.PATH_SEND_DATA
+import com.google.android.gms.wearable.Wearable
 import kotlinx.coroutines.launch
 
 /**End-of-workout summary screen**/
@@ -62,6 +69,28 @@ fun SummaryScreen(
 ) {
     val listState = rememberScalingLazyListState()
     val coroutineScope = rememberCoroutineScope()
+    val context = LocalContext.current
+
+    fun sendDataToPhone(data: String) {
+        Wearable.getNodeClient(context).connectedNodes.addOnSuccessListener { nodes ->
+            nodes.forEach { node ->
+                Wearable.getMessageClient(context)
+                    .sendMessage(
+                        node.id,
+                        PATH_SEND_DATA,
+                        data.toByteArray()
+                    ).addOnSuccessListener {
+                        Log.d("BBBBBBB", data)
+                        Toast.makeText(context, "Send data to phone", Toast.LENGTH_SHORT)
+                            .show()
+                    }
+                    .addOnFailureListener {
+                        Toast.makeText(context, "Send failure: ${it.message}", Toast.LENGTH_SHORT)
+                            .show()
+                    }
+            }
+        }
+    }
     ExerciseSampleTheme {
         Scaffold(positionIndicator = {
             PositionIndicator(
@@ -84,7 +113,6 @@ fun SummaryScreen(
                     .focusable(),
                 verticalArrangement = Arrangement.spacedBy(10.dp),
                 state = listState,
-
                 ) {
                 item { ListHeader { Text(stringResource(id = R.string.workout_complete)) } }
                 item {
@@ -133,7 +161,11 @@ fun SummaryScreen(
                 }
 
             }
-            LaunchedEffect(Unit) { focusRequester.requestFocus() }
+            LaunchedEffect(Unit) {
+                val data = "${Constants.KEY_TOTAL_DISTANCE}:$totalDistance,${Constants.KEY_AVG_HEARTH}:$averageHeartRate,${Constants.KEY_TOTAL_CARLO}:$totalCalories"
+                sendDataToPhone(data = data)
+                focusRequester.requestFocus()
+            }
         }
     }
 

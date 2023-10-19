@@ -23,4 +23,5 @@ sealed class Screens(
     object StartingUp : Screens("startingUp")
     object PreparingExercise : Screens("preparingExercise")
     object SummaryScreen : Screens("summaryScreen")
+    object RestTime : Screens("restTime")
 }

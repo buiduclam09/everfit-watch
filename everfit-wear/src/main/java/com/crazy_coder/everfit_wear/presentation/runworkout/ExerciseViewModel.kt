@@ -16,6 +16,7 @@
 package com.crazy_coder.everfit_wear.presentation.runworkout
 
 import android.Manifest
+import android.widget.Toast
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
@@ -24,6 +25,9 @@ import androidx.lifecycle.viewModelScope
 import com.crazy_coder.everfit_wear.data.HealthServicesRepository
 import com.crazy_coder.everfit_wear.data.ServiceState
 import com.crazy_coder.everfit_wear.presentation.MainViewModel
+import com.crazy_coder.everfit_wear.utils.Constants
+import com.google.android.gms.wearable.Node
+import com.google.android.gms.wearable.Wearable
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.flow.SharingStarted
@@ -31,11 +35,13 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import java.util.function.BinaryOperator
 
 /** Data class for the initial values we need to check before a user starts an exercise **/
 data class ExerciseUiState(
     val hasExerciseCapabilities: Boolean = true,
     val isTrackingAnotherExercise: Boolean = false,
+    val isShowRestTimer: Boolean = false
 )
 
 @HiltViewModel
