@@ -20,6 +20,7 @@ import com.google.android.gms.wearable.Wearable
 import com.google.android.material.snackbar.Snackbar
 import com.crazy_coder.everfit_wear.base.BaseActivity
 import com.crazy_coder.everfit_wear.data.model.Exercise
+import com.crazy_coder.everfit_wear.data.model.Rest
 import com.crazy_coder.everfit_wear.databinding.ActivityHomeBinding
 import com.crazy_coder.everfit_wear.utils.view.clicks
 import com.crazy_coder.everfit_wear.utils.view.gone
@@ -108,27 +109,32 @@ class HomeActivity : BaseActivity() {
             }
         }
         binding.btnStartWorkout.clicks {
-            val exercise = exercises[Random(4).nextInt()]
+            val exercise = exercises.random()
             val data = "${Constants.KEY_TITLE}:${exercise.name},${Constants.KEY_EVENT}:${Constants.KEY_START}"
             sendEvent(data)
             startExercise(exercise)
         }
 
         binding.btnNextWorkout.clicks {
-            val exercise = exercises[Random(4).nextInt()]
+            completeExercise()
+            val exercise = exercises.random()
             startExercise(exercise)
         }
         binding.btnCompleteWorkout.clicks {
-            sendEvent(Constants.KEY_COMPLETE)
+            completeExercise()
+            val data = "${Constants.KEY_EVENT}:${Constants.KEY_COMPLETE}"
+            sendEvent(data)
         }
         binding.btnRest.clicks {
             val data = "${Constants.KEY_EVENT}:${Constants.KEY_REST}"
             sendEvent(data)
+            startRest(rests[0])
         }
 
         binding.btnOffRest.clicks {
             val data = "${Constants.KEY_EVENT}:${Constants.KEY_SKIP_REST}"
             sendEvent(data)
+            skipRest()
         }
     }
 
@@ -179,12 +185,14 @@ class HomeActivity : BaseActivity() {
     }
 
     private fun startExercise(exercise: Exercise) {
+        binding.imvGif.visibility = View.VISIBLE
         binding.tvTitleWorkout.text = exercise.name
         binding.tvDescriptionWorkout.text = exercise.description
-        Glide.with(this)
+        Glide.with(this@HomeActivity)
             .asGif()
             .load(exercise.gifImageUrl)
             .into(binding.imvGif)
+
         binding.tvTimerWorkout.text = formatTime(exercise.durationInSeconds)
 
         timer = object : CountDownTimer(exercise.durationInSeconds * 1000L, 1000) {
@@ -195,7 +203,31 @@ class HomeActivity : BaseActivity() {
 
             override fun onFinish() {
                 binding.btnStartWorkout.text = "Restart Workout"
-                binding.imvGif.visibility = View.VISIBLE
+                binding.imvGif.visibility = View.GONE
+                binding.btnStartWorkout.isEnabled = true
+            }
+        }.start()
+    }
+
+
+    private fun startRest(rest: Rest) {
+        binding.imvGif.visibility = View.VISIBLE
+        binding.tvTitleWorkout.text = rest.name
+        Glide.with(this@HomeActivity)
+            .asGif()
+            .load(rest.gifImageUrl)
+            .into(binding.imvGif)
+
+        binding.tvTimerWorkout.text = formatTime(rest.durationInSeconds)
+
+        timer = object : CountDownTimer(rest.durationInSeconds * 1000L, 1000) {
+            override fun onTick(millisUntilFinished: Long) {
+                binding.tvTimerWorkout.text = formatTime((millisUntilFinished / 1000).toInt())
+
+            }
+
+            override fun onFinish() {
+                binding.imvGif.visibility = View.GONE
                 binding.btnStartWorkout.isEnabled = true
             }
         }.start()
@@ -208,6 +240,12 @@ class HomeActivity : BaseActivity() {
     }
 
     private fun completeExercise() {
+        binding.imvGif.gone()
+        timer.cancel()
+    }
+
+    private fun skipRest() {
+        binding.imvGif.gone()
         timer.cancel()
     }
 
@@ -218,19 +256,19 @@ class HomeActivity : BaseActivity() {
                 "Push-ups",
                 "Place your hands shoulder-width apart on the floor. Lower your body until your chest nearly touches the floor. Push your body back up until your arms are fully extended.",
                 300,
-                "https://media.tenor.com/gI-8qCUEko8AAAAC/pushup.gif"
+                "https://media.giphy.com/media/xTiTnlS1f0DlwzCkko/giphy.gif"
             ),
             Exercise(
                 "Squats",
                 "Stand with your feet shoulder-width apart. Lower your body as far as you can by pushing your hips back and bending your knees. Return to the starting position.",
                 450,
-                "https://thumbs.gfycat.com/HeftyPartialGroundbeetle-size_restricted.gif"
+                "https://media.giphy.com/media/IAocXiLUK4Y8t28IKC/giphy.gif"
             ),
             Exercise(
                 "Plank",
                 "Start in a push-up position, then bend your elbows and rest your weight on your forearms. Hold this position for as long as you can.",
                 600,
-                "https://media.tenor.com/6SOetkNbfakAAAAM/plank-abs.gif"
+                "https://media.giphy.com/media/xIQKDKVYvtipesfWFD/giphy.gif"
             ),
             Exercise(
                 "Leg Lifts",
@@ -238,6 +276,14 @@ class HomeActivity : BaseActivity() {
                 300,
                 "https://media.giphy.com/media/xT0BKC0JxPEIkUCvjq/giphy.gif"
             )
+        )
+
+        private val rests = mutableListOf(
+            Rest(
+                "Rest",
+                300,
+                "https://media.giphy.com/media/KD8Ldwzx90X9hi9QHW/giphy.gif"
+            ),
         )
     }
 

@@ -26,11 +26,11 @@ import kotlinx.coroutines.launch
 @AndroidEntryPoint
 class RunWorkoutActivity : ComponentActivity() {
     private lateinit var navController: NavHostController
-
     private val exerciseViewModel by viewModels<ExerciseViewModel>()
     private val eventListenMessage: MessageClient.OnMessageReceivedListener by lazy {
-        MessageClient.OnMessageReceivedListener {
+        MessageClient.OnMessageReceivedListener { it ->
             String(it.data).let {
+                Log.d("BBBBB", "$it")
                 Toast.makeText(this, "From phone: $it", Toast.LENGTH_SHORT).show()
             }
         }
@@ -43,7 +43,6 @@ class RunWorkoutActivity : ComponentActivity() {
             if (!task.isSuccessful) {
                 return@OnCompleteListener
             }
-
             // Get new FCM registration token
             Log.e("AAAAAAAAAAAAA", "${task.result}")
             task.result?.let {
