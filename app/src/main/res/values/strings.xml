@@ -9,13 +9,17 @@
     </plurals>
     <string name="dose_rate">Dose rate:</string>
     <string name="total_dose">Total dose:</string>
-    <string name="heart_rate">Heart rate:</string>
+    <string name="heart_rate">AVG HR: </string>
     <string name="temperature">Temperature:</string>
     <string name="step">Steps:</string>
-    <string name="calories">Calories Daily:</string>
+    <string name="distance">Distances:</string>
+    <string name="calories">Calories Total:</string>
     <string name="text_saturation">O2 Saturation:</string>
     <string name="connect_waer">Connect Wear</string>
     <string name="not_support_bluetooth">Not support bluetooth</string>
     <string name="your_watch_isn_t_connected_to_your_phone">Your watch isn\'t connected to your phone</string>
     <string name="connect">Connect</string>
+    <string name="next_workout">Next Workout</string>
+    <string name="rest">Rest</string>
+    <string name="rest_off">Break off time</string>
 </resources>

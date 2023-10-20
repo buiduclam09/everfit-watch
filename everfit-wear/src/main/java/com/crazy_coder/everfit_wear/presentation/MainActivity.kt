@@ -78,9 +78,9 @@ class MainActivity : ComponentActivity() {
             ActivityResultContracts.RequestPermission()
         ) { result ->
             viewModel.updateStatusPermission(result)
-            startWorker()
+//            startWorker()
         }
-        runCatching { startWorker() }
+//        runCatching { startWorker() }
         viewModel.updateStatusPermission(checkSelfPermission(PERMISSION) == PackageManager.PERMISSION_GRANTED)
         setContent {
             WearApp(viewModel, notification)
