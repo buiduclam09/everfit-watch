@@ -1,7 +1,7 @@
 package com.crazy_coder.everfit_wear.app
 
 object Constants {
-    const val ACTIVITY_RESULT = "RESULT"
+    const val DATA_RESULT_KEY = "RESULT_DESTINATION"
     const val KEY_EVENT = "KEY_EVENT"
     const val KEY_TITLE = "KEY_TITLE"
     const val KEY_AVG_HEARTH = "AVG_HEARTH"

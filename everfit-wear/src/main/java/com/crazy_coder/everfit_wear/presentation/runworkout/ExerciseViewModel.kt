@@ -29,9 +29,12 @@ import com.crazy_coder.everfit_wear.utils.Constants
 import com.google.android.gms.wearable.Node
 import com.google.android.gms.wearable.Wearable
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
 import javax.inject.Inject
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -48,6 +51,8 @@ data class ExerciseUiState(
 class ExerciseViewModel @Inject constructor(
     private val healthServicesRepository: HealthServicesRepository
 ) : ViewModel() {
+    val _navigation = MutableSharedFlow<String>()
+    val navigation = _navigation.asSharedFlow()
     private val _state = mutableStateOf(RunWorkoutState())
     val state: State<RunWorkoutState> = _state
     val permissions = arrayOf(
@@ -89,6 +94,7 @@ class ExerciseViewModel @Inject constructor(
     fun pauseExercise() = viewModelScope.launch { healthServicesRepository.pauseExercise() }
     fun endExercise() = viewModelScope.launch { healthServicesRepository.endExercise() }
     fun resumeExercise() = viewModelScope.launch { healthServicesRepository.resumeExercise() }
+    fun isShowRestTimer() = false
 
     fun updateToken(token: String) {
         _state.value = state.value.copy(token = token)
@@ -98,7 +104,7 @@ class ExerciseViewModel @Inject constructor(
         data class RunWorkoutState(
             val heartRate: String = "0.0",
             val temperature: String = "0.0",
-            val pea : String = "0",
+            val pea: String = "0",
             val showButtonRequest: Boolean = true,
             val step: String = "0",
             val token: String = ""

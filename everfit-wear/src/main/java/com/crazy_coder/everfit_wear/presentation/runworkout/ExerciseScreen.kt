@@ -78,9 +78,13 @@ fun ExerciseScreen(
     onStartClick: () -> Unit = {},
     serviceState: ServiceState,
     navController: NavHostController,
+    isShowRestTime: Boolean
 ) {
     val chronoTickJob = remember { mutableStateOf<Job?>(null) }
 
+    if (isShowRestTime) {
+        ExerciseInRestTimerAlert(true)
+    }
     /** Only collect metrics while we are connected to the Foreground Service. **/
     when (serviceState) {
         is ServiceState.Connected -> {

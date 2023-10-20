@@ -7,20 +7,26 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.compose.runtime.Composable
-import androidx.health.services.client.data.DataType
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavHostController
 import androidx.wear.compose.material.Text
 import androidx.wear.compose.navigation.rememberSwipeDismissableNavController
+import com.crazy_coder.everfit_wear.data.model.EventWorkout
 import com.crazy_coder.everfit_wear.presentation.ExerciseSampleApp
 import com.crazy_coder.everfit_wear.presentation.route.Screens
-import com.crazy_coder.everfit_wear.utils.Constants.PATH_SEND_DATA
 import com.google.android.gms.tasks.OnCompleteListener
 import com.google.android.gms.wearable.MessageClient
 import com.google.android.gms.wearable.Wearable
 import com.google.firebase.messaging.FirebaseMessaging
+import com.google.gson.Gson
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
+import com.crazy_coder.everfit_wear.utils.Constants
+import com.crazy_coder.everfit_wear.utils.Constants.KEY_COMPLETE
+import com.crazy_coder.everfit_wear.utils.Constants.KEY_NEXT
+import com.crazy_coder.everfit_wear.utils.Constants.KEY_REST
+import com.crazy_coder.everfit_wear.utils.Constants.KEY_SKIP_REST
+import com.crazy_coder.everfit_wear.utils.Constants.KEY_START
 
 
 @AndroidEntryPoint
@@ -29,9 +35,14 @@ class RunWorkoutActivity : ComponentActivity() {
     private val exerciseViewModel by viewModels<ExerciseViewModel>()
     private val eventListenMessage: MessageClient.OnMessageReceivedListener by lazy {
         MessageClient.OnMessageReceivedListener { it ->
-            String(it.data).let {
-                Log.d("BBBBB", "$it")
-                Toast.makeText(this, "From phone: $it", Toast.LENGTH_SHORT).show()
+            Log.d("BBBBB", "${it.data}")
+            Toast.makeText(this, "From phone: $it", Toast.LENGTH_SHORT).show()
+            String(it.data).apply {
+                val gson = Gson()
+                val receivedString = String(it.data, Charsets.UTF_8)
+                val receivedEvent =
+                    gson.fromJson(receivedString, EventWorkout::class.java) ?: return@OnMessageReceivedListener
+                Log.d("BBBBB", "${receivedString}")
             }
         }
     }
@@ -70,6 +81,40 @@ class RunWorkoutActivity : ComponentActivity() {
 
         setContent {
             MyApp()
+        }
+    }
+
+    private fun navigationWhenReceiveEvent(receivedEvent: EventWorkout) {
+        lifecycleScope.launch {
+            val destination = when (receivedEvent.event) {
+                KEY_START -> {
+                    Screens.StartingUp.route
+                }
+
+                KEY_NEXT -> {
+                    Screens.ExerciseScreen.route
+                }
+
+                KEY_COMPLETE -> {
+                    Screens.SummaryScreen.route
+                }
+
+                KEY_REST -> {
+                    Screens.ExerciseScreen.route
+                }
+
+                KEY_SKIP_REST -> {
+                    Screens.ExerciseScreen.route
+                }
+
+                else -> {
+                    if (exerciseViewModel.isExerciseInProgress()) {
+                        Screens.ExerciseScreen.route
+                    } else {
+                        Screens.StartingUp.route
+                    }
+                }
+            }
         }
     }
 

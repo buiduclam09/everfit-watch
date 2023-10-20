@@ -50,11 +50,13 @@ import androidx.wear.compose.material.TimeText
 import androidx.wear.compose.material.TimeTextDefaults
 import androidx.wear.compose.material.rememberScalingLazyListState
 import com.crazy_coder.everfit_wear.R
+import com.crazy_coder.everfit_wear.data.model.DataWorkout
 import com.crazy_coder.everfit_wear.presentation.component.SummaryFormat
 import com.crazy_coder.everfit_wear.presentation.theme.ExerciseSampleTheme
 import com.crazy_coder.everfit_wear.utils.Constants
 import com.crazy_coder.everfit_wear.utils.Constants.PATH_SEND_DATA
 import com.google.android.gms.wearable.Wearable
+import com.google.gson.Gson
 import kotlinx.coroutines.launch
 
 /**End-of-workout summary screen**/
@@ -71,16 +73,19 @@ fun SummaryScreen(
     val coroutineScope = rememberCoroutineScope()
     val context = LocalContext.current
 
-    fun sendDataToPhone(data: String) {
+    fun sendDataToPhone(data: DataWorkout) {
+        val gson = Gson()
+        val eventString = gson.toJson(data)
+        val eventByteArray = eventString.toByteArray(Charsets.UTF_8)
         Wearable.getNodeClient(context).connectedNodes.addOnSuccessListener { nodes ->
             nodes.forEach { node ->
                 Wearable.getMessageClient(context)
                     .sendMessage(
                         node.id,
                         PATH_SEND_DATA,
-                        data.toByteArray()
+                        eventByteArray
                     ).addOnSuccessListener {
-                        Log.d("BBBBBBB", data)
+                        Log.d("BBBBBBB", data.toString())
                         Toast.makeText(context, "Send data to phone", Toast.LENGTH_SHORT)
                             .show()
                     }
@@ -162,8 +167,12 @@ fun SummaryScreen(
 
             }
             LaunchedEffect(Unit) {
-                val data = "${Constants.KEY_TOTAL_DISTANCE}:$totalDistance,${Constants.KEY_AVG_HEARTH}:$averageHeartRate,${Constants.KEY_TOTAL_CARLO}:$totalCalories"
-                sendDataToPhone(data = data)
+                val dataWorkout = DataWorkout(
+                    avgHeart = averageHeartRate,
+                    distanceTotal = totalDistance,
+                    calories = totalCalories
+                )
+                sendDataToPhone(data = dataWorkout)
                 focusRequester.requestFocus()
             }
         }
@@ -179,6 +188,4 @@ fun SummaryScreenPreview() {
         totalCalories = "100",
         elapsedTime = "17m01",
         onRestartClick = {})
-
-
 }

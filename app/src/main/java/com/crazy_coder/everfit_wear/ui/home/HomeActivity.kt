@@ -7,6 +7,7 @@ import android.hardware.Sensor
 import android.os.Build
 import android.os.Bundle
 import android.os.CountDownTimer
+import android.util.Log
 import android.view.View
 import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
@@ -19,13 +20,20 @@ import com.google.android.gms.wearable.MessageClient.OnMessageReceivedListener
 import com.google.android.gms.wearable.Wearable
 import com.google.android.material.snackbar.Snackbar
 import com.crazy_coder.everfit_wear.base.BaseActivity
+import com.crazy_coder.everfit_wear.data.model.DataWorkout
+import com.crazy_coder.everfit_wear.data.model.EventWorkout
 import com.crazy_coder.everfit_wear.data.model.Exercise
 import com.crazy_coder.everfit_wear.data.model.Rest
 import com.crazy_coder.everfit_wear.databinding.ActivityHomeBinding
 import com.crazy_coder.everfit_wear.utils.view.clicks
 import com.crazy_coder.everfit_wear.utils.view.gone
 import com.crazy_coder.everfit_wear.utils.view.show
+import com.google.android.gms.tasks.Task
+import com.google.android.gms.wearable.DataItem
 import com.google.android.gms.wearable.Node
+import com.google.android.gms.wearable.PutDataMapRequest
+import com.google.android.gms.wearable.PutDataRequest
+import com.google.gson.Gson
 import dagger.hilt.android.AndroidEntryPoint
 import kotlin.random.Random
 
@@ -46,29 +54,25 @@ class HomeActivity : BaseActivity() {
         }
     }
     private lateinit var timer: CountDownTimer
+    var exercise: Exercise? = null
 
     private val eventListenMessage: OnMessageReceivedListener by lazy {
         OnMessageReceivedListener {
             String(it.data).apply {
-                val keyValueMap = mutableMapOf<String, String>()
-                split(",").forEach { pair ->
-                    val (key, value) = pair.split(":")
-                    keyValueMap[key] = value
-                }
-                val distance = keyValueMap[Constants.KEY_TOTAL_DISTANCE]
-                val heartRate = keyValueMap[Constants.KEY_AVG_HEARTH]
-                val calories = keyValueMap[Constants.KEY_TOTAL_CARLO]
-
-                if (distance.isNullOrEmpty()) {
-                    binding.tvTotalDistance.text = "$distance km"
+                val gson = Gson()
+                val receivedString = String(it.data, Charsets.UTF_8)
+                val receivedEvent = gson.fromJson(receivedString, DataWorkout::class.java)
+                Log.d("BBBBB", "$receivedEvent")
+                if (receivedEvent.distanceTotal?.isNotEmpty() == true) {
+                    binding.tvTotalDistance.text = "${receivedEvent.distanceTotal}"
                     binding.clContainerInforWatch.show()
                 }
-                if (heartRate.isNullOrEmpty()) {
-                    binding.tvHeartRate.text = "$heartRate bpm"
+                if (receivedEvent.avgHeart?.isNotEmpty() == true) {
+                    binding.tvHeartRate.text = "${receivedEvent.avgHeart} bpm"
                     binding.clContainerInforWatch.show()
                 }
-                if (calories.isNullOrEmpty()) {
-                    binding.tvCaloriesValue.text = "$calories cal"
+                if (receivedEvent.calories?.isNotEmpty() == true) {
+                    binding.tvCaloriesValue.text = "${receivedEvent.calories}"
                     binding.clContainerInforWatch.show()
                 }
             }
@@ -108,32 +112,39 @@ class HomeActivity : BaseActivity() {
                     }
             }
         }
+
         binding.btnStartWorkout.clicks {
-            val exercise = exercises.random()
-            val data = "${Constants.KEY_TITLE}:${exercise.name},${Constants.KEY_EVENT}:${Constants.KEY_START}"
+            exercise = exercises.random()
+            val data = EventWorkout(title = exercise?.name, event = Constants.KEY_START)
             sendEvent(data)
-            startExercise(exercise)
+            startExercise(exercise ?: exercises[0])
         }
 
         binding.btnNextWorkout.clicks {
             completeExercise()
-            val exercise = exercises.random()
-            startExercise(exercise)
+            exercise = exercises.random()
+            val data = EventWorkout(title = exercise?.name, event = Constants.KEY_NEXT)
+            sendEvent(data)
+            passDataWakeUpApp(data)
+            startExercise(exercise ?: exercises[0])
         }
         binding.btnCompleteWorkout.clicks {
             completeExercise()
-            val data = "${Constants.KEY_EVENT}:${Constants.KEY_COMPLETE}"
+            val data = EventWorkout(title = exercise?.name, event = Constants.KEY_COMPLETE)
+            passDataWakeUpApp(data)
             sendEvent(data)
         }
         binding.btnRest.clicks {
-            val data = "${Constants.KEY_EVENT}:${Constants.KEY_REST}"
+            val data = EventWorkout(title = exercise?.name, event = Constants.KEY_REST)
             sendEvent(data)
+            passDataWakeUpApp(data)
             startRest(rests[0])
         }
 
         binding.btnOffRest.clicks {
-            val data = "${Constants.KEY_EVENT}:${Constants.KEY_SKIP_REST}"
+            val data = EventWorkout(title = exercise?.name, event = Constants.KEY_SKIP_REST)
             sendEvent(data)
+            passDataWakeUpApp(data)
             skipRest()
         }
     }
@@ -287,12 +298,15 @@ class HomeActivity : BaseActivity() {
         )
     }
 
-    private fun sendEvent(event: String) {
+    private fun sendEvent(event: EventWorkout) {
+        val gson = Gson()
+        val eventString = gson.toJson(event)
+        val eventByteArray = eventString.toByteArray(Charsets.UTF_8)
         listWearConnect.forEach { node ->
             Wearable.getMessageClient(this).sendMessage(
                 node.id,
                 PATH_SEND_DATA,
-                event.toByteArray()
+                eventByteArray
             ).addOnSuccessListener {
                 Toast.makeText(
                     this,
@@ -308,5 +322,28 @@ class HomeActivity : BaseActivity() {
                     ).show()
                 }
         }
+    }
+
+    private fun passDataWakeUpApp(event: EventWorkout) {
+        val gson = Gson()
+        val dataEventSend = gson.toJson(event)
+        val putDataReq: PutDataRequest = PutDataMapRequest.create("/path_to_data").run {
+            dataMap.putString(Constants.DATA_RESULT_KEY, dataEventSend)  // Or any other destination
+            asPutDataRequest()
+        }
+        Wearable.getDataClient(this).putDataItem(putDataReq).addOnSuccessListener {
+            Toast.makeText(
+                this,
+                "Send data to wear",
+                Toast.LENGTH_SHORT
+            ).show()
+        }
+            .addOnFailureListener {
+                Toast.makeText(
+                    this,
+                    "Send failure: ${it.message}",
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
     }
 }
