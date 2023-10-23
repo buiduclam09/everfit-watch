@@ -39,6 +39,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.health.services.client.data.DataPoint
 import androidx.health.services.client.data.DataType
 import androidx.health.services.client.data.ExerciseState
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import androidx.wear.compose.material.Button
@@ -88,6 +89,7 @@ fun ExerciseScreen(
     /** Only collect metrics while we are connected to the Foreground Service. **/
     when (serviceState) {
         is ServiceState.Connected -> {
+            val viewModel = hiltViewModel<ExerciseViewModel>()
             val scope = rememberCoroutineScope()
             val getExerciseServiceState by serviceState.exerciseServiceState.collectAsStateWithLifecycle()
             val exerciseMetrics by mutableStateOf(getExerciseServiceState.exerciseMetrics)
@@ -166,6 +168,24 @@ fun ExerciseScreen(
                         activeStateChange.durationCheckPoint.activeDuration.plusMillis(timeOffset)
                     chronoTickJob.value = startTick(chronoTickJob.value, scope) { tickerTime ->
                         activeDuration = baseActiveDuration.value.plusMillis(tickerTime)
+                    }
+
+                    averageHeartRate?.let {
+                        viewModel.updateHeart(
+                            it.toInt()
+                        )
+                    }
+
+                    calories?.let {
+                        viewModel.updateCalories(
+                            calories = formatCalories(it).toString()
+                        )
+                    }
+                    distance?.let {
+                        viewModel.updateDistance(formatDistanceKm(it).toString())
+                    }
+                    laps.let {
+                        viewModel.updateLaps(it)
                     }
                 } else {
                     chronoTickJob.value?.cancel()

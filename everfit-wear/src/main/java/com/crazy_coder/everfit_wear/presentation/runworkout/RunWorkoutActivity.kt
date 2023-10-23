@@ -57,7 +57,7 @@ class RunWorkoutActivity : ComponentActivity() {
             // Get new FCM registration token
             Log.e("AAAAAAAAAAAAA", "${task.result}")
             task.result?.let {
-                exerciseViewModel.updateToken(it)
+//                exerciseViewModel.updateToken(it)
             }
         })
         lifecycleScope.launch {

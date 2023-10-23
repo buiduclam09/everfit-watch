@@ -96,15 +96,35 @@ class ExerciseViewModel @Inject constructor(
     fun resumeExercise() = viewModelScope.launch { healthServicesRepository.resumeExercise() }
     fun isShowRestTimer() = false
 
-    fun updateToken(token: String) {
+    fun updateData(token: String) {
         _state.value = state.value.copy(token = token)
+    }
+
+    fun updateHeart(avgHeart: Int) {
+        _state.value = state.value.copy(avgHeart = avgHeart)
+    }
+
+    fun  updateLaps(lap : Int){
+        _state.value = state.value.copy(esclap = lap)
+    }
+
+    fun updateDistance(distance: String) {
+        _state.value = state.value.copy(distance = distance)
+    }
+
+    fun updateCalories(calories: String) {
+        _state.value = state.value.copy(calories = calories)
     }
 
     companion object {
         data class RunWorkoutState(
             val heartRate: String = "0.0",
+            val avgHeart: Int = 0,
             val temperature: String = "0.0",
-            val pea: String = "0",
+            val peace: String = "0",
+            val distance: String = "0",
+            val calories: String = "0",
+            val esclap : Int = 0,
             val showButtonRequest: Boolean = true,
             val step: String = "0",
             val token: String = ""
