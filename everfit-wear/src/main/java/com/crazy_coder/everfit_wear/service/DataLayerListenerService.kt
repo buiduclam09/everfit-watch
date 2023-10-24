@@ -3,14 +3,12 @@ package com.crazy_coder.everfit_wear.service
 import android.content.Intent
 import android.util.Log
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
-import com.crazy_coder.everfit_wear.data.model.EventWorkout
 import com.crazy_coder.everfit_wear.utils.Constants.DATA_RESULT_KEY
 import com.crazy_coder.everfit_wear.utils.Constants.KEY_NAVIGATE_DESTINATION
 import com.google.android.gms.wearable.DataEvent
 import com.google.android.gms.wearable.DataEventBuffer
 import com.google.android.gms.wearable.DataMapItem
 import com.google.android.gms.wearable.WearableListenerService
-import com.google.gson.Gson
 
 
 //todo check issue same data not emit

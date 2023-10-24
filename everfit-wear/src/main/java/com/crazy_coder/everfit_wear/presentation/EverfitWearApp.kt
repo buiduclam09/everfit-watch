@@ -68,6 +68,7 @@ import com.crazy_coder.everfit_wear.utils.Constants.KEY_REST
 import com.crazy_coder.everfit_wear.utils.Constants.KEY_SKIP_REST
 import com.crazy_coder.everfit_wear.utils.Constants.KEY_START
 import com.google.gson.Gson
+import kotlin.random.Random
 
 
 /** Navigation for the exercise app. **/
@@ -79,7 +80,7 @@ fun ExerciseSampleApp(
 ) {
     val viewModel = hiltViewModel<ExerciseViewModel>()
     val context = LocalContext.current
-    val destination = remember { mutableStateOf(EventWorkout("", KEY_PRE_START)) }
+    val destination = remember { mutableStateOf(EventWorkout("", KEY_PRE_START, Random.nextLong())) }
     val showDialog = remember { mutableStateOf(false) }
     val service by viewModel.exerciseServiceState
     var isAcceptGps = false
@@ -119,16 +120,12 @@ fun ExerciseSampleApp(
                         popUpTo(navController.graph.id) {
                             inclusive = true
                         }
-                        viewModel.endExercise()
-                        viewModel.startExercise()
                     }
                 } else {
                     navController.navigate(Screens.ExerciseScreen.route) {
                         popUpTo(navController.graph.id) {
                             inclusive = true
                         }
-                        viewModel.endExercise()
-                        viewModel.startExercise()
                     }
                 }
             }
@@ -142,12 +139,13 @@ fun ExerciseSampleApp(
             KEY_COMPLETE -> {
                 if (navController.currentDestination?.route == Screens.ExerciseScreen.route) {
                     viewModel.endExercise()
-                    Log.d("BBBBB", "${viewModel.state}")
-                    navController.navigate(Screens.SummaryScreen.route + "${viewModel.state.value.avgHeart}/${viewModel.state.value.distance}/${viewModel.state.value.calories}/${viewModel.state.value.esclap}") {
+                    ///{averageHeartRate}/{totalDistance}/{totalCalories}/{elapsedTime}
+                    navController.navigate(Screens.SummaryScreen.route + "/{${viewModel.state.value.avgHeart}}/{${viewModel.state.value.distance}}/{${viewModel.state.value.calories}}/{${viewModel.state.value.esclap}}") {
                         popUpTo(navController.graph.id) {
                             inclusive = true
                         }
                     }
+                    Log.d("BBBBB", "${viewModel.state}")
                 } else {
                     return@LaunchedEffect
                 }
@@ -271,7 +269,6 @@ fun ExerciseSampleApp(
                     )
                 },
                 onTimeout = {
-                    showDialog.value = false
                 },
             ) {
                 Text(

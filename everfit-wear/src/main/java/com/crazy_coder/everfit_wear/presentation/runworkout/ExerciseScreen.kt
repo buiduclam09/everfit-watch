@@ -26,6 +26,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.ThumbUp
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -172,23 +173,29 @@ fun ExerciseScreen(
 
                     averageHeartRate?.let {
                         viewModel.updateHeart(
-                            it.toInt()
+                            it
                         )
                     }
 
                     calories?.let {
                         viewModel.updateCalories(
-                            calories = formatCalories(it).toString()
+                            calories = it
                         )
                     }
                     distance?.let {
                         viewModel.updateDistance(formatDistanceKm(it).toString())
                     }
-                    laps.let {
-                        viewModel.updateLaps(it)
+                    laps?.let {
+                        viewModel.updateLaps(it.toLong())
                     }
                 } else {
                     chronoTickJob.value?.cancel()
+                }
+            }
+
+            DisposableEffect(serviceState) {
+                onDispose {
+
                 }
             }
 

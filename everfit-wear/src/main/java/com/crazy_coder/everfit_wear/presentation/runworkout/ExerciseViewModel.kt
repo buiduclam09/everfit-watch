@@ -16,29 +16,24 @@
 package com.crazy_coder.everfit_wear.presentation.runworkout
 
 import android.Manifest
-import android.widget.Toast
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.crazy_coder.everfit_wear.data.HealthServicesRepository
+import com.crazy_coder.everfit_wear.data.PassiveDataRepository
 import com.crazy_coder.everfit_wear.data.ServiceState
-import com.crazy_coder.everfit_wear.presentation.MainViewModel
-import com.crazy_coder.everfit_wear.utils.Constants
-import com.google.android.gms.wearable.Node
-import com.google.android.gms.wearable.Wearable
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.MutableStateFlow
 import javax.inject.Inject
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import java.util.function.BinaryOperator
+import kotlinx.coroutines.runBlocking
 
 /** Data class for the initial values we need to check before a user starts an exercise **/
 data class ExerciseUiState(
@@ -49,10 +44,26 @@ data class ExerciseUiState(
 
 @HiltViewModel
 class ExerciseViewModel @Inject constructor(
-    private val healthServicesRepository: HealthServicesRepository
+    private val healthServicesRepository: HealthServicesRepository,
+    private val repository: PassiveDataRepository,
 ) : ViewModel() {
-    val _navigation = MutableSharedFlow<String>()
-    val navigation = _navigation.asSharedFlow()
+    init {
+        repository.latestHeartRate
+            .onEach { _state.value = state.value.copy(heartRate = it.toString()) }
+            .launchIn(viewModelScope)
+        repository.latestCalories
+            .onEach { _state.value = state.value.copy(calories = it.toString()) }
+            .launchIn(viewModelScope)
+        repository.latestDistances
+            .onEach {
+                _state.value = state.value.copy(distance = it)
+            }.launchIn(viewModelScope)
+        repository.latestClap
+            .onEach {
+                _state.value = state.value.copy(esclap = it)
+            }.launchIn(viewModelScope)
+    }
+
     private val _state = mutableStateOf(RunWorkoutState())
     val state: State<RunWorkoutState> = _state
     val permissions = arrayOf(
@@ -100,21 +111,28 @@ class ExerciseViewModel @Inject constructor(
         _state.value = state.value.copy(token = token)
     }
 
-    fun updateHeart(avgHeart: Int) {
-        _state.value = state.value.copy(avgHeart = avgHeart)
+    fun updateHeart(avgHeart: Double) {
+        runBlocking {
+            repository.storeLatestHeartRate(avgHeart)
+        }
     }
 
-    fun  updateLaps(lap : Int){
+    fun updateLaps(lap: Long) {
         _state.value = state.value.copy(esclap = lap)
     }
 
     fun updateDistance(distance: String) {
-        _state.value = state.value.copy(distance = distance)
+        runBlocking {
+            repository.storeLatestDistances(distances = distance)
+        }
     }
 
-    fun updateCalories(calories: String) {
-        _state.value = state.value.copy(calories = calories)
+    fun updateCalories(calories: Double) {
+        runBlocking {
+            repository.storeLatestCalories(calories = calories)
+        }
     }
+
 
     companion object {
         data class RunWorkoutState(
@@ -124,7 +142,7 @@ class ExerciseViewModel @Inject constructor(
             val peace: String = "0",
             val distance: String = "0",
             val calories: String = "0",
-            val esclap : Int = 0,
+            val esclap: Long = 0,
             val showButtonRequest: Boolean = true,
             val step: String = "0",
             val token: String = ""

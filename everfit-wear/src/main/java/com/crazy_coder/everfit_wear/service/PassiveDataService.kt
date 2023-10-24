@@ -31,7 +31,7 @@ class PassiveDataService : PassiveListenerService() {
                 sendHeartRateToPhone(it)
             }
             dataPoints.getData(DataType.STEPS).latestSteps()?.let {
-                repository.storeLatestSteps(it)
+                repository.storeLatestDistances(it)
                 sendStepToPhone(it)
             }
         }

@@ -1,5 +1,6 @@
 package com.crazy_coder.everfit_wear.ui.home
 
+import android.annotation.SuppressLint
 import android.bluetooth.BluetoothAdapter
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -205,7 +206,7 @@ class HomeActivity : BaseActivity() {
             }
 
             override fun onFinish() {
-                binding.btnStartWorkout.text = "Restart Workout"
+                binding.btnStartWorkout.text = "Start Workout"
                 binding.imvGif.visibility = View.GONE
                 binding.btnStartWorkout.isEnabled = true
             }
@@ -316,6 +317,7 @@ class HomeActivity : BaseActivity() {
         }
     }
 
+    @SuppressLint("VisibleForTests")
     private fun passDataWakeUpApp(event: EventWorkout) {
         val gson = Gson()
         val dataEventSend = gson.toJson(event)
