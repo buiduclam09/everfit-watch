@@ -68,7 +68,7 @@ class CalculatorDataWorker @AssistedInject constructor(
         stepsListener = SensorDataListener { step ->
             if (step > 0) {
                 runBlocking {
-                    repository.storeLatestDistances(steps = step.toLong())
+                    repository.storeLatestSteps(step = step.toLong())
                 }
             }
         }

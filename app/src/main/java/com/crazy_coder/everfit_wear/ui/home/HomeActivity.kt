@@ -117,6 +117,12 @@ class HomeActivity : BaseActivity() {
             startExercise(exercise ?: exercises[0])
         }
 
+        binding.btnWakeUp.clicks {
+            exercise = exercises.random()
+            val data = EventWorkout(title = exercise?.name, event = Constants.KEY_START)
+            wakeUpApp(data)
+        }
+
         binding.btnNextWorkout.clicks {
             completeExercise()
             exercise = exercises.random()
@@ -322,6 +328,29 @@ class HomeActivity : BaseActivity() {
         val gson = Gson()
         val dataEventSend = gson.toJson(event)
         val putDataReq: PutDataRequest = PutDataMapRequest.create("/path_to_data").run {
+            dataMap.putString(Constants.DATA_RESULT_KEY, dataEventSend)  // Or any other destination
+            asPutDataRequest()
+        }
+        Wearable.getDataClient(this).putDataItem(putDataReq).addOnSuccessListener {
+            Toast.makeText(
+                this,
+                "Send data to wear",
+                Toast.LENGTH_SHORT
+            ).show()
+        }
+            .addOnFailureListener {
+                Toast.makeText(
+                    this,
+                    "Send failure: ${it.message}",
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+    }
+
+    private fun wakeUpApp(event: EventWorkout) {
+        val gson = Gson()
+        val dataEventSend = gson.toJson(event)
+        val putDataReq: PutDataRequest = PutDataMapRequest.create("/wake_up").run {
             dataMap.putString(Constants.DATA_RESULT_KEY, dataEventSend)  // Or any other destination
             asPutDataRequest()
         }

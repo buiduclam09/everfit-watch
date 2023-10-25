@@ -140,7 +140,7 @@ fun ExerciseSampleApp(
                 if (navController.currentDestination?.route == Screens.ExerciseScreen.route) {
                     viewModel.endExercise()
                     ///{averageHeartRate}/{totalDistance}/{totalCalories}/{elapsedTime}
-                    navController.navigate(Screens.SummaryScreen.route + "/{${viewModel.state.value.avgHeart}}/{${viewModel.state.value.distance}}/{${viewModel.state.value.calories}}/{${viewModel.state.value.esclap}}") {
+                    navController.navigate(Screens.SummaryScreen.route + "/{${viewModel.state.value.avgHeart}}/{${viewModel.state.value.distance}}/{${viewModel.state.value.calories}}/{${viewModel.state.value.claps}}") {
                         popUpTo(navController.graph.id) {
                             inclusive = true
                         }

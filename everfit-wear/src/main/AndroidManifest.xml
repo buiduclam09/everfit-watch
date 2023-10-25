@@ -101,6 +101,10 @@
                     android:host="*"
                     android:pathPrefix="/path_to_data"
                     android:scheme="wear" />
+                <data
+                    android:host="*"
+                    android:pathPrefix="/wake_up"
+                    android:scheme="wear" />
             </intent-filter>
         </service>
     </application>

@@ -16,14 +16,22 @@
 package com.crazy_coder.everfit_wear.presentation.runworkout
 
 import android.Manifest
+import android.content.Intent
+import android.util.Log
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.crazy_coder.everfit_wear.data.HealthServicesRepository
 import com.crazy_coder.everfit_wear.data.PassiveDataRepository
 import com.crazy_coder.everfit_wear.data.ServiceState
+import com.crazy_coder.everfit_wear.utils.Constants
+import com.google.android.gms.wearable.DataClient
+import com.google.android.gms.wearable.DataEvent
+import com.google.android.gms.wearable.DataEventBuffer
+import com.google.android.gms.wearable.DataMapItem
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.flow.SharingStarted
@@ -46,23 +54,7 @@ data class ExerciseUiState(
 class ExerciseViewModel @Inject constructor(
     private val healthServicesRepository: HealthServicesRepository,
     private val repository: PassiveDataRepository,
-) : ViewModel() {
-    init {
-        repository.latestHeartRate
-            .onEach { _state.value = state.value.copy(heartRate = it.toString()) }
-            .launchIn(viewModelScope)
-        repository.latestCalories
-            .onEach { _state.value = state.value.copy(calories = it.toString()) }
-            .launchIn(viewModelScope)
-        repository.latestDistances
-            .onEach {
-                _state.value = state.value.copy(distance = it)
-            }.launchIn(viewModelScope)
-        repository.latestClap
-            .onEach {
-                _state.value = state.value.copy(esclap = it)
-            }.launchIn(viewModelScope)
-    }
+) : ViewModel(), DataClient.OnDataChangedListener  {
 
     private val _state = mutableStateOf(RunWorkoutState())
     val state: State<RunWorkoutState> = _state
@@ -118,7 +110,7 @@ class ExerciseViewModel @Inject constructor(
     }
 
     fun updateLaps(lap: Long) {
-        _state.value = state.value.copy(esclap = lap)
+        _state.value = state.value.copy(claps = lap)
     }
 
     fun updateDistance(distance: String) {
@@ -136,17 +128,40 @@ class ExerciseViewModel @Inject constructor(
 
     companion object {
         data class RunWorkoutState(
-            val heartRate: String = "0.0",
+            val heartRate: Double = 0.0,
             val avgHeart: Int = 0,
             val temperature: String = "0.0",
             val peace: String = "0",
             val distance: String = "0",
-            val calories: String = "0",
-            val esclap: Long = 0,
+            val calories: Double = 0.0,
+            val claps: Long = 0,
             val showButtonRequest: Boolean = true,
             val step: String = "0",
             val token: String = ""
         )
+    }
+
+    //todo refactor
+    override fun onDataChanged(p0: DataEventBuffer) {
+        Log.d("BBBBBB", "onDataChanged ${p0.count}")
+
+        p0.forEach { event ->
+            if (event.type == DataEvent.TYPE_CHANGED) {
+                val dataMap = DataMapItem.fromDataItem(event.dataItem).dataMap
+                val destination = dataMap.getString(Constants.DATA_RESULT_KEY)
+                // Broadcast or send the data to your Composable or ViewModel
+                // For simplicity, let's assume you're using a Broadcast:
+                Log.d("BBBBBB", "$destination")
+                event.dataItem.also { item ->
+                    when (item.uri.path) {
+                        "/path_to_data" -> {
+
+                        }
+                    }
+                }
+            }
+        }
+        p0.release()
     }
 }
 
