@@ -105,22 +105,29 @@ class ExerciseViewModel @Inject constructor(
 
     fun updateHeart(avgHeart: Double) {
         runBlocking {
+            _state.value = state.value.copy(avgHeart = avgHeart)
             repository.storeLatestHeartRate(avgHeart)
         }
     }
 
     fun updateLaps(lap: Long) {
-        _state.value = state.value.copy(claps = lap)
+        runBlocking {
+            _state.value = state.value.copy(claps = lap)
+            repository.storeLatestClap(lap)
+        }
+
     }
 
-    fun updateDistance(distance: String) {
+    fun updateDistance(distance: Double) {
         runBlocking {
+            _state.value = state.value.copy(distance = distance)
             repository.storeLatestDistances(distances = distance)
         }
     }
 
     fun updateCalories(calories: Double) {
         runBlocking {
+            _state.value = state.value.copy(calories = calories)
             repository.storeLatestCalories(calories = calories)
         }
     }
@@ -129,10 +136,11 @@ class ExerciseViewModel @Inject constructor(
     companion object {
         data class RunWorkoutState(
             val heartRate: Double = 0.0,
-            val avgHeart: Int = 0,
+            val avgHeart: Double = 0.0,
+            val duration: Double = 0.0,
             val temperature: String = "0.0",
             val peace: String = "0",
-            val distance: String = "0",
+            val distance: Double = 0.0,
             val calories: Double = 0.0,
             val claps: Long = 0,
             val showButtonRequest: Boolean = true,

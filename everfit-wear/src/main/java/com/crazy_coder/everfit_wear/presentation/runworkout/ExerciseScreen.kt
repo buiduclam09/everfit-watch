@@ -15,6 +15,7 @@
  */
 package com.crazy_coder.everfit_wear.presentation.runworkout
 
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -83,7 +84,8 @@ fun ExerciseScreen(
     onStartClick: () -> Unit = {},
     serviceState: ServiceState,
     navController: NavHostController,
-    isShowRestTime: Boolean
+    isShowRestTime: Boolean,
+    viewModel: ExerciseViewModel,
 ) {
     val chronoTickJob = remember { mutableStateOf<Job?>(null) }
 
@@ -93,7 +95,6 @@ fun ExerciseScreen(
     /** Only collect metrics while we are connected to the Foreground Service. **/
     when (serviceState) {
         is ServiceState.Connected -> {
-            val viewModel = hiltViewModel<ExerciseViewModel>()
             val scope = rememberCoroutineScope()
             val getExerciseServiceState by serviceState.exerciseServiceState.collectAsStateWithLifecycle()
             val exerciseMetrics by mutableStateOf(getExerciseServiceState.exerciseMetrics)
@@ -106,6 +107,14 @@ fun ExerciseScreen(
              * collectAsStateWithLifecycle() is asynchronous, store the last known value from each flow,
              * and update the value on screen only when the flow re-connects. **/
             val tempHeartRate = remember { mutableStateOf(0.0) }
+            Log.e(
+                "######",
+                "HearthRate: ${
+                    exerciseMetrics?.getData(DataType.HEART_RATE_BPM)
+                        ?.map { it -> "${it.value}--- ${it.accuracy.toString()}" }?.toList().toString()
+                }"
+            )
+
             if (exerciseMetrics?.getData(DataType.HEART_RATE_BPM)
                     ?.isNotEmpty() == true
             ) tempHeartRate.value =
@@ -127,6 +136,23 @@ fun ExerciseScreen(
                 exerciseMetrics?.getData(DataType.HEART_RATE_BPM_STATS)?.average
             val tempAverageHeartRate = remember { mutableStateOf(0.0) }
 
+            averageHeartRate?.let {
+                viewModel.updateHeart(
+                    it
+                )
+            }
+
+            calories?.let {
+                viewModel.updateCalories(
+                    calories = it
+                )
+            }
+            distance?.let {
+                viewModel.updateDistance(it)
+            }
+            laps?.let {
+                viewModel.updateLaps(it.toLong())
+            }
             /** Update the Pause and End buttons according to [ExerciseState].**/
             val pauseOrResume = when (exerciseStateChange.exerciseState.isPaused) {
                 true -> painterResource(R.drawable.ic_play)
@@ -173,32 +199,8 @@ fun ExerciseScreen(
                     chronoTickJob.value = startTick(chronoTickJob.value, scope) { tickerTime ->
                         activeDuration = baseActiveDuration.value.plusMillis(tickerTime)
                     }
-
-                    averageHeartRate?.let {
-                        viewModel.updateHeart(
-                            it
-                        )
-                    }
-
-                    calories?.let {
-                        viewModel.updateCalories(
-                            calories = it
-                        )
-                    }
-                    distance?.let {
-                        viewModel.updateDistance(formatDistanceKm(it).toString())
-                    }
-                    laps?.let {
-                        viewModel.updateLaps(it.toLong())
-                    }
                 } else {
                     chronoTickJob.value?.cancel()
-                }
-            }
-
-            DisposableEffect(serviceState) {
-                onDispose {
-
                 }
             }
 
@@ -218,7 +220,8 @@ fun ExerciseScreen(
                     ) {
                         Text(
                             "Push ups",
-                            modifier = Modifier.fillMaxWidth()
+                            modifier = Modifier
+                                .fillMaxWidth()
                                 .padding(top = 8.dp, bottom = 8.dp),
                             textAlign = TextAlign.Center,
                         )

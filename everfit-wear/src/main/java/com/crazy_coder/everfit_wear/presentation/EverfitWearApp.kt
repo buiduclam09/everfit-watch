@@ -113,7 +113,10 @@ fun ExerciseSampleApp(
         }
     }
     LaunchedEffect(destination.value) {
-        Log.e("BBBBB", "Destination EverfitWearApp ${navController.currentDestination?.route} -- event ${destination.value.event}")
+        Log.e(
+            "BBBBB",
+            "Destination EverfitWearApp ${navController.currentDestination?.route} -- event ${destination.value.event}"
+        )
         when (destination.value.event) {
             KEY_START -> {
                 if (isAcceptGps) {
@@ -140,13 +143,13 @@ fun ExerciseSampleApp(
             KEY_COMPLETE -> {
                 if (navController.currentDestination?.route == Screens.ExerciseScreen.route) {
                     viewModel.endExercise()
+                    Log.e("BBBBB", "BBBBBB${viewModel.state.value}")
                     ///{averageHeartRate}/{totalDistance}/{totalCalories}/{elapsedTime}
                     navController.navigate(Screens.SummaryScreen.route + "/{${viewModel.state.value.avgHeart}}/{${viewModel.state.value.distance}}/{${viewModel.state.value.calories}}/{${viewModel.state.value.claps}}") {
                         popUpTo(navController.graph.id) {
                             inclusive = true
                         }
                     }
-                    Log.d("BBBBB", "${viewModel.state}")
                 } else {
                     return@LaunchedEffect
                 }
@@ -216,7 +219,6 @@ fun ExerciseSampleApp(
             )
         }
         composable(Screens.ExerciseScreen.route) {
-            val viewModel = hiltViewModel<ExerciseViewModel>()
             val serviceState by viewModel.exerciseServiceState
             ExerciseScreen(
                 onPauseClick = { viewModel.pauseExercise() },
@@ -225,7 +227,8 @@ fun ExerciseSampleApp(
                 onStartClick = { viewModel.startExercise() },
                 serviceState = serviceState,
                 navController = navController,
-                isShowRestTime = false
+                isShowRestTime = false,
+                viewModel = viewModel
             )
         }
         composable(Screens.ExerciseNotAvailable.route) {
@@ -238,7 +241,8 @@ fun ExerciseSampleApp(
                 navArgument("totalCalories") { type = NavType.StringType },
                 navArgument("elapsedTime") { type = NavType.StringType })
         ) {
-            SummaryScreen(averageHeartRate = it.arguments?.getString("averageHeartRate")!!,
+            SummaryScreen(
+                averageHeartRate = it.arguments?.getString("averageHeartRate")!!,
                 totalDistance = it.arguments?.getString("totalDistance")!!,
                 totalCalories = it.arguments?.getString("totalCalories")!!,
                 elapsedTime = it.arguments?.getString("elapsedTime")!!,
@@ -248,7 +252,8 @@ fun ExerciseSampleApp(
                             inclusive = true
                         }
                     }
-                }
+                },
+                viewModel
             )
         }
     }
@@ -264,9 +269,11 @@ fun ExerciseSampleApp(
                     Icon(
                         imageVector = Icons.Filled.Check,
                         contentDescription = stringResource(R.string.confirmation_dialog_tick),
-                        modifier = Modifier.size(48.dp).clickable {
-                            showDialog.value = false
-                        }
+                        modifier = Modifier
+                            .size(48.dp)
+                            .clickable {
+                                showDialog.value = false
+                            }
                     )
                 },
                 onTimeout = {

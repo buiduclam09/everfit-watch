@@ -36,11 +36,11 @@ class PassiveDataRepository @Inject constructor(@ApplicationContext val context:
         }
     }
 
-    val latestDistances: Flow<String> = context.dataStore.data.map { prefs ->
-        prefs[LATEST_DISTANCE] ?: ""
+    val latestDistances: Flow<Double> = context.dataStore.data.map { prefs ->
+        prefs[LATEST_DISTANCE] ?: 0.0
     }
 
-    suspend fun storeLatestDistances(distances: String) {
+    suspend fun storeLatestDistances(distances: Double) {
         context.dataStore.edit { pref ->
             pref[LATEST_DISTANCE] = distances
         }
@@ -77,13 +77,24 @@ class PassiveDataRepository @Inject constructor(@ApplicationContext val context:
         }
     }
 
+    val latestDuration: Flow<Double> = context.dataStore.data.map { prefs ->
+        prefs[LATEST_DURATION] ?: 0.0
+    }
+
+    suspend fun storeLatestDuration(duration: Double) {
+        context.dataStore.edit { prefs ->
+            prefs[LATEST_DURATION] = duration
+        }
+    }
+
     companion object {
         private val LATEST_HEART_RATE = doublePreferencesKey("latest_heart_rate")
         private val LATEST_TEMPERATURE = doublePreferencesKey("latest_temperature")
-        private val LATEST_DISTANCE = stringPreferencesKey("latest_distances")
+        private val LATEST_DISTANCE = doublePreferencesKey("latest_distances")
         private val LATEST_STEPS = longPreferencesKey("latest_steps")
         private val LATEST_CLAPS = longPreferencesKey("latest_claps")
         private val LATEST_CALORIES = doublePreferencesKey("latest_calories")
+        private val LATEST_DURATION = doublePreferencesKey("latest_duration")
     }
 }
 
