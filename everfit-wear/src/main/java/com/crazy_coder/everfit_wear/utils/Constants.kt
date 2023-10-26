@@ -13,6 +13,7 @@ object Constants {
     const val KEY_REST = "REST"
     const val KEY_SKIP_REST = "SKIP REST"
     const val KEY_START = "START"
+    const val KEY_UNKNOWN = "KEY_UNKNOWN"
     const val KEY_PRE_START = "KEY_PRE_START"
     const val KEY_NEXT = "NEXT"
     const val KEY_COMPLETE = "COMPLETE"

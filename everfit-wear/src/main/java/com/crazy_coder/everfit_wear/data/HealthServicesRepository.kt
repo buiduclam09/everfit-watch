@@ -1,12 +1,18 @@
 package com.crazy_coder.everfit_wear.data
 
+import android.app.Notification
+import android.app.NotificationChannel
+import android.app.NotificationManager
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
+import android.os.Build
 import android.os.IBinder
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
+import androidx.core.content.ContextCompat.getSystemService
 import androidx.health.services.client.data.LocationAvailability
+import com.crazy_coder.everfit_wear.R
 import com.crazy_coder.everfit_wear.service.ActiveDurationUpdate
 import com.crazy_coder.everfit_wear.service.ForegroundService
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -67,10 +73,27 @@ class HealthServicesRepository @Inject constructor(
     }
 
     fun createService() {
-        Intent(applicationContext, ForegroundService::class.java).also { intent ->
-            applicationContext.startService(intent)
-            applicationContext.bindService(intent, connection, Context.BIND_AUTO_CREATE)
+        val foregroundServiceIntent = Intent(applicationContext, ForegroundService::class.java)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            // Create a notification channel for the foreground service
+            val channel = NotificationChannel("channel_id", "Channel Name", NotificationManager.IMPORTANCE_DEFAULT)
+            val notificationManager = getSystemService(applicationContext,NotificationManager::class.java)
+            notificationManager?.createNotificationChannel(channel)
+
+            // Start the foreground service with a notification
+            val notification = Notification.Builder(applicationContext, "channel_id")
+                .setContentTitle("Foreground Service")
+                .setContentText("Service is running")
+                .setSmallIcon(R.drawable.ic_app_notification)
+                .build()
+
+//            startForeground(1, notification)
+            applicationContext.startForegroundService(foregroundServiceIntent)
+        } else {
+            applicationContext.startService(foregroundServiceIntent)
         }
+
+        applicationContext.bindService(foregroundServiceIntent, connection, Context.BIND_AUTO_CREATE)
     }
 
 }

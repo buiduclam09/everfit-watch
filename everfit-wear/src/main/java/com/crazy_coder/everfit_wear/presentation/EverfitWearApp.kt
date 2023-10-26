@@ -67,6 +67,7 @@ import com.crazy_coder.everfit_wear.utils.Constants.KEY_PRE_START
 import com.crazy_coder.everfit_wear.utils.Constants.KEY_REST
 import com.crazy_coder.everfit_wear.utils.Constants.KEY_SKIP_REST
 import com.crazy_coder.everfit_wear.utils.Constants.KEY_START
+import com.crazy_coder.everfit_wear.utils.Constants.KEY_UNKNOWN
 import com.google.gson.Gson
 import kotlin.random.Random
 
@@ -80,7 +81,7 @@ fun ExerciseSampleApp(
 ) {
     val viewModel = hiltViewModel<ExerciseViewModel>()
     val context = LocalContext.current
-    val destination = remember { mutableStateOf(EventWorkout("", KEY_PRE_START, Random.nextLong())) }
+    val destination = remember { mutableStateOf(EventWorkout("", KEY_UNKNOWN, Random.nextLong())) }
     val showDialog = remember { mutableStateOf(false) }
     val service by viewModel.exerciseServiceState
     var isAcceptGps = false
@@ -112,7 +113,7 @@ fun ExerciseSampleApp(
         }
     }
     LaunchedEffect(destination.value) {
-        Log.e("BBBBB", "Destination EverfitWearApp ${navController.currentDestination?.route}")
+        Log.e("BBBBB", "Destination EverfitWearApp ${navController.currentDestination?.route} -- event ${destination.value.event}")
         when (destination.value.event) {
             KEY_START -> {
                 if (isAcceptGps) {

@@ -128,23 +128,27 @@ class HomeActivity : BaseActivity() {
             exercise = exercises.random()
             val data = EventWorkout(title = exercise?.name, event = Constants.KEY_NEXT)
             passDataWakeUpApp(data)
+            sendEvent(data)
             startExercise(exercise ?: exercises[0])
         }
         binding.btnCompleteWorkout.clicks {
             completeExercise()
             val data = EventWorkout(title = exercise?.name, event = Constants.KEY_COMPLETE)
             passDataWakeUpApp(data)
+            sendEvent(data)
         }
         binding.btnRest.clicks {
             val data = EventWorkout(title = exercise?.name, event = Constants.KEY_REST)
             passDataWakeUpApp(data)
             startRest(rests[0])
+            sendEvent(data)
         }
 
         binding.btnOffRest.clicks {
             val data = EventWorkout(title = exercise?.name, event = Constants.KEY_SKIP_REST)
             passDataWakeUpApp(data)
             skipRest()
+            sendEvent(data)
         }
     }
 

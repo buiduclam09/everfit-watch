@@ -54,7 +54,7 @@ data class ExerciseUiState(
 class ExerciseViewModel @Inject constructor(
     private val healthServicesRepository: HealthServicesRepository,
     private val repository: PassiveDataRepository,
-) : ViewModel(), DataClient.OnDataChangedListener  {
+) : ViewModel() {
 
     private val _state = mutableStateOf(RunWorkoutState())
     val state: State<RunWorkoutState> = _state
@@ -139,29 +139,6 @@ class ExerciseViewModel @Inject constructor(
             val step: String = "0",
             val token: String = ""
         )
-    }
-
-    //todo refactor
-    override fun onDataChanged(p0: DataEventBuffer) {
-        Log.d("BBBBBB", "onDataChanged ${p0.count}")
-
-        p0.forEach { event ->
-            if (event.type == DataEvent.TYPE_CHANGED) {
-                val dataMap = DataMapItem.fromDataItem(event.dataItem).dataMap
-                val destination = dataMap.getString(Constants.DATA_RESULT_KEY)
-                // Broadcast or send the data to your Composable or ViewModel
-                // For simplicity, let's assume you're using a Broadcast:
-                Log.d("BBBBBB", "$destination")
-                event.dataItem.also { item ->
-                    when (item.uri.path) {
-                        "/path_to_data" -> {
-
-                        }
-                    }
-                }
-            }
-        }
-        p0.release()
     }
 }
 
