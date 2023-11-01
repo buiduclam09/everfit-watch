@@ -15,6 +15,7 @@
  */
 package com.crazy_coder.everfit_wear.presentation.runworkout
 
+import android.text.format.DateUtils.formatElapsedTime
 import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.background
@@ -35,10 +36,7 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.input.rotary.onRotaryScrollEvent
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.tooling.preview.Devices
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.health.services.client.data.DataType
 import androidx.wear.compose.material.Button
 import androidx.wear.compose.material.ListHeader
 import androidx.wear.compose.material.MaterialTheme
@@ -53,11 +51,12 @@ import com.crazy_coder.everfit_wear.R
 import com.crazy_coder.everfit_wear.data.model.DataWorkout
 import com.crazy_coder.everfit_wear.presentation.component.SummaryFormat
 import com.crazy_coder.everfit_wear.presentation.theme.ExerciseSampleTheme
-import com.crazy_coder.everfit_wear.utils.Constants
 import com.crazy_coder.everfit_wear.utils.Constants.PATH_SEND_DATA
+import com.crazy_coder.everfit_wear.utils.formatDistanceKm
 import com.google.android.gms.wearable.Wearable
 import com.google.gson.Gson
 import kotlinx.coroutines.launch
+import kotlin.math.roundToInt
 
 /**End-of-workout summary screen**/
 
@@ -67,7 +66,8 @@ fun SummaryScreen(
     totalDistance: String,
     totalCalories: String,
     elapsedTime: String,
-    onRestartClick: () -> Unit
+    onRestartClick: () -> Unit,
+    viewModel: ExerciseViewModel
 ) {
     val listState = rememberScalingLazyListState()
     val coroutineScope = rememberCoroutineScope()
@@ -118,32 +118,32 @@ fun SummaryScreen(
                     .focusable(),
                 verticalArrangement = Arrangement.spacedBy(10.dp),
                 state = listState,
-                ) {
+            ) {
                 item { ListHeader { Text(stringResource(id = R.string.workout_complete)) } }
                 item {
                     SummaryFormat(
-                        value = elapsedTime,
+                        value = formatElapsedTime(viewModel.state.value.claps),
                         metric = stringResource(id = R.string.duration),
                         modifier = Modifier.fillMaxWidth()
                     )
                 }
                 item {
                     SummaryFormat(
-                        value = averageHeartRate,
+                        value = viewModel.state.value.avgHeart.toString(),
                         metric = stringResource(id = R.string.avgHR),
                         modifier = Modifier.fillMaxWidth()
                     )
                 }
                 item {
                     SummaryFormat(
-                        value = totalDistance,
+                        value = formatDistanceKm(viewModel.state.value.distance).toString(),
                         metric = stringResource(id = R.string.distance),
                         modifier = Modifier.fillMaxWidth()
                     )
                 }
                 item {
                     SummaryFormat(
-                        value = totalCalories,
+                        value = viewModel.state.value.calories.roundToInt().toString(),
                         metric = stringResource(id = R.string.calories),
                         modifier = Modifier.fillMaxWidth()
                     )
@@ -177,15 +177,4 @@ fun SummaryScreen(
             }
         }
     }
-
-}
-
-@Preview(device = Devices.WEAR_OS_SMALL_ROUND, showSystemUi = true)
-@Composable
-fun SummaryScreenPreview() {
-    SummaryScreen(averageHeartRate = "75.0",
-        totalDistance = "2 km",
-        totalCalories = "100",
-        elapsedTime = "17m01",
-        onRestartClick = {})
 }

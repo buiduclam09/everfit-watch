@@ -16,29 +16,32 @@
 package com.crazy_coder.everfit_wear.presentation.runworkout
 
 import android.Manifest
-import android.widget.Toast
+import android.content.Intent
+import android.util.Log
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.crazy_coder.everfit_wear.data.HealthServicesRepository
+import com.crazy_coder.everfit_wear.data.PassiveDataRepository
 import com.crazy_coder.everfit_wear.data.ServiceState
-import com.crazy_coder.everfit_wear.presentation.MainViewModel
 import com.crazy_coder.everfit_wear.utils.Constants
-import com.google.android.gms.wearable.Node
-import com.google.android.gms.wearable.Wearable
+import com.google.android.gms.wearable.DataClient
+import com.google.android.gms.wearable.DataEvent
+import com.google.android.gms.wearable.DataEventBuffer
+import com.google.android.gms.wearable.DataMapItem
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.MutableStateFlow
 import javax.inject.Inject
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import java.util.function.BinaryOperator
+import kotlinx.coroutines.runBlocking
 
 /** Data class for the initial values we need to check before a user starts an exercise **/
 data class ExerciseUiState(
@@ -49,10 +52,10 @@ data class ExerciseUiState(
 
 @HiltViewModel
 class ExerciseViewModel @Inject constructor(
-    private val healthServicesRepository: HealthServicesRepository
+    private val healthServicesRepository: HealthServicesRepository,
+    private val repository: PassiveDataRepository,
 ) : ViewModel() {
-    val _navigation = MutableSharedFlow<String>()
-    val navigation = _navigation.asSharedFlow()
+
     private val _state = mutableStateOf(RunWorkoutState())
     val state: State<RunWorkoutState> = _state
     val permissions = arrayOf(
@@ -96,15 +99,50 @@ class ExerciseViewModel @Inject constructor(
     fun resumeExercise() = viewModelScope.launch { healthServicesRepository.resumeExercise() }
     fun isShowRestTimer() = false
 
-    fun updateToken(token: String) {
+    fun updateData(token: String) {
         _state.value = state.value.copy(token = token)
     }
 
+    fun updateHeart(avgHeart: Double) {
+        runBlocking {
+            _state.value = state.value.copy(avgHeart = avgHeart)
+            repository.storeLatestHeartRate(avgHeart)
+        }
+    }
+
+    fun updateLaps(lap: Long) {
+        runBlocking {
+            _state.value = state.value.copy(claps = lap)
+            repository.storeLatestClap(lap)
+        }
+
+    }
+
+    fun updateDistance(distance: Double) {
+        runBlocking {
+            _state.value = state.value.copy(distance = distance)
+            repository.storeLatestDistances(distances = distance)
+        }
+    }
+
+    fun updateCalories(calories: Double) {
+        runBlocking {
+            _state.value = state.value.copy(calories = calories)
+            repository.storeLatestCalories(calories = calories)
+        }
+    }
+
+
     companion object {
         data class RunWorkoutState(
-            val heartRate: String = "0.0",
+            val heartRate: Double = 0.0,
+            val avgHeart: Double = 0.0,
+            val duration: Double = 0.0,
             val temperature: String = "0.0",
-            val pea: String = "0",
+            val peace: String = "0",
+            val distance: Double = 0.0,
+            val calories: Double = 0.0,
+            val claps: Long = 0,
             val showButtonRequest: Boolean = true,
             val step: String = "0",
             val token: String = ""

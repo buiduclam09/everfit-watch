@@ -21,6 +21,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.util.Log
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
@@ -36,6 +37,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.health.services.client.data.LocationAvailability
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
@@ -49,6 +51,7 @@ import androidx.wear.compose.material.dialog.Dialog
 import androidx.wear.compose.navigation.SwipeDismissableNavHost
 import androidx.wear.compose.navigation.composable
 import com.crazy_coder.everfit_wear.R
+import com.crazy_coder.everfit_wear.data.ServiceState
 import com.crazy_coder.everfit_wear.data.model.EventWorkout
 import com.crazy_coder.everfit_wear.presentation.route.Screens
 import com.crazy_coder.everfit_wear.presentation.runworkout.ExerciseNotAvailable
@@ -59,13 +62,14 @@ import com.crazy_coder.everfit_wear.presentation.runworkout.StartingUp
 import com.crazy_coder.everfit_wear.presentation.runworkout.SummaryScreen
 import com.crazy_coder.everfit_wear.utils.Constants.DATA_RESULT_KEY
 import com.crazy_coder.everfit_wear.utils.Constants.KEY_COMPLETE
-import com.crazy_coder.everfit_wear.utils.Constants.KEY_EVENT
 import com.crazy_coder.everfit_wear.utils.Constants.KEY_NAVIGATE_DESTINATION
 import com.crazy_coder.everfit_wear.utils.Constants.KEY_PRE_START
 import com.crazy_coder.everfit_wear.utils.Constants.KEY_REST
 import com.crazy_coder.everfit_wear.utils.Constants.KEY_SKIP_REST
 import com.crazy_coder.everfit_wear.utils.Constants.KEY_START
+import com.crazy_coder.everfit_wear.utils.Constants.KEY_UNKNOWN
 import com.google.gson.Gson
+import kotlin.random.Random
 
 
 /** Navigation for the exercise app. **/
@@ -75,9 +79,19 @@ fun ExerciseSampleApp(
     navController: NavHostController,
     startDestination: String
 ) {
+    val viewModel = hiltViewModel<ExerciseViewModel>()
     val context = LocalContext.current
-    val destination = remember { mutableStateOf(EventWorkout("", KEY_PRE_START)) }
+    val destination = remember { mutableStateOf(EventWorkout("", KEY_UNKNOWN, Random.nextLong())) }
     val showDialog = remember { mutableStateOf(false) }
+    val service by viewModel.exerciseServiceState
+    var isAcceptGps = false
+    if (service is ServiceState.Connected) {
+        val locationFlow = (service as ServiceState.Connected).locationAvailabilityState
+        val location by locationFlow.collectAsStateWithLifecycle()
+        isAcceptGps =
+            location == LocationAvailability.ACQUIRED_TETHERED || location == LocationAvailability.ACQUIRED_UNTETHERED
+
+    }
     DisposableEffect(context) {
         val receiver = object : BroadcastReceiver() {
             override fun onReceive(context: Context?, intent: Intent?) {
@@ -86,6 +100,7 @@ fun ExerciseSampleApp(
                     val gson = Gson()
                     val destinationObj = gson.fromJson(dataReceive, EventWorkout::class.java)
                     destination.value = destinationObj
+                    Log.e("BBBBB", "Destination ${destinationObj}")
                 }
             }
         }
@@ -98,11 +113,24 @@ fun ExerciseSampleApp(
         }
     }
     LaunchedEffect(destination.value) {
-        Log.e("BBBBB", "Destination ${navController.currentDestination?.route}")
+        Log.e(
+            "BBBBB",
+            "Destination EverfitWearApp ${navController.currentDestination?.route} -- event ${destination.value.event}"
+        )
         when (destination.value.event) {
-            KEY_START -> navController.navigate(Screens.StartingUp.route) {
-                popUpTo(navController.graph.id) {
-                    inclusive = true
+            KEY_START -> {
+                if (isAcceptGps) {
+                    navController.navigate(Screens.StartingUp.route) {
+                        popUpTo(navController.graph.id) {
+                            inclusive = true
+                        }
+                    }
+                } else {
+                    navController.navigate(Screens.ExerciseScreen.route) {
+                        popUpTo(navController.graph.id) {
+                            inclusive = true
+                        }
+                    }
                 }
             }
 
@@ -112,23 +140,37 @@ fun ExerciseSampleApp(
                 }
             }
 
-            KEY_COMPLETE -> navController.navigate(Screens.SummaryScreen.route) {
-                popUpTo(navController.graph.id) {
-                    inclusive = true
+            KEY_COMPLETE -> {
+                if (navController.currentDestination?.route == Screens.ExerciseScreen.route) {
+                    viewModel.endExercise()
+                    Log.e("BBBBB", "BBBBBB${viewModel.state.value}")
+                    ///{averageHeartRate}/{totalDistance}/{totalCalories}/{elapsedTime}
+                    navController.navigate(Screens.SummaryScreen.route + "/{${viewModel.state.value.avgHeart}}/{${viewModel.state.value.distance}}/{${viewModel.state.value.calories}}/{${viewModel.state.value.claps}}") {
+                        popUpTo(navController.graph.id) {
+                            inclusive = true
+                        }
+                    }
+                } else {
+                    return@LaunchedEffect
                 }
             }
 
+
             KEY_REST -> {
-                if (navController.currentDestination?.route == Screens.StartingUp.route) {
+                if (navController.currentDestination?.route == Screens.ExerciseScreen.route) {
                     showDialog.value = true
+                } else {
+                    return@LaunchedEffect
                 }
             }
 
             KEY_SKIP_REST -> {
-                if (navController.currentDestination?.route == Screens.StartingUp.route) {
+                if (navController.currentDestination?.route == Screens.ExerciseScreen.route) {
                     if (showDialog.value) {  // Check if the dialog is showing
                         showDialog.value = false // If yes, close the dialog
                     }
+                } else {
+                    return@LaunchedEffect
                 }
             }
         }
@@ -177,7 +219,6 @@ fun ExerciseSampleApp(
             )
         }
         composable(Screens.ExerciseScreen.route) {
-            val viewModel = hiltViewModel<ExerciseViewModel>()
             val serviceState by viewModel.exerciseServiceState
             ExerciseScreen(
                 onPauseClick = { viewModel.pauseExercise() },
@@ -186,7 +227,8 @@ fun ExerciseSampleApp(
                 onStartClick = { viewModel.startExercise() },
                 serviceState = serviceState,
                 navController = navController,
-                isShowRestTime = false
+                isShowRestTime = false,
+                viewModel = viewModel
             )
         }
         composable(Screens.ExerciseNotAvailable.route) {
@@ -199,7 +241,8 @@ fun ExerciseSampleApp(
                 navArgument("totalCalories") { type = NavType.StringType },
                 navArgument("elapsedTime") { type = NavType.StringType })
         ) {
-            SummaryScreen(averageHeartRate = it.arguments?.getString("averageHeartRate")!!,
+            SummaryScreen(
+                averageHeartRate = it.arguments?.getString("averageHeartRate")!!,
                 totalDistance = it.arguments?.getString("totalDistance")!!,
                 totalCalories = it.arguments?.getString("totalCalories")!!,
                 elapsedTime = it.arguments?.getString("elapsedTime")!!,
@@ -209,7 +252,8 @@ fun ExerciseSampleApp(
                             inclusive = true
                         }
                     }
-                }
+                },
+                viewModel
             )
         }
     }
@@ -225,12 +269,15 @@ fun ExerciseSampleApp(
                     Icon(
                         imageVector = Icons.Filled.Check,
                         contentDescription = stringResource(R.string.confirmation_dialog_tick),
-                        modifier = Modifier.size(48.dp)
+                        modifier = Modifier
+                            .size(48.dp)
+                            .clickable {
+                                showDialog.value = false
+                            }
                     )
                 },
                 onTimeout = {
-
-                }
+                },
             ) {
                 Text(
                     text = stringResource(R.string.ending_timer),

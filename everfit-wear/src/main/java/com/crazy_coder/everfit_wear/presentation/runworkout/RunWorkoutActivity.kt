@@ -1,5 +1,6 @@
 package com.crazy_coder.everfit_wear.presentation.runworkout
 
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
@@ -8,6 +9,7 @@ import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.compose.runtime.Composable
 import androidx.lifecycle.lifecycleScope
+import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.navigation.NavHostController
 import androidx.wear.compose.material.Text
 import androidx.wear.compose.navigation.rememberSwipeDismissableNavController
@@ -35,14 +37,17 @@ class RunWorkoutActivity : ComponentActivity() {
     private val exerciseViewModel by viewModels<ExerciseViewModel>()
     private val eventListenMessage: MessageClient.OnMessageReceivedListener by lazy {
         MessageClient.OnMessageReceivedListener { it ->
-            Log.d("BBBBB", "${it.data}")
+            Log.e("BBBBB", "${it.data}")
             Toast.makeText(this, "From phone: $it", Toast.LENGTH_SHORT).show()
             String(it.data).apply {
                 val gson = Gson()
                 val receivedString = String(it.data, Charsets.UTF_8)
                 val receivedEvent =
                     gson.fromJson(receivedString, EventWorkout::class.java) ?: return@OnMessageReceivedListener
-                Log.d("BBBBB", "${receivedString}")
+                Log.e("BBBBBB","$receivedEvent")
+                val intent = Intent(Constants.KEY_NAVIGATE_DESTINATION)
+                intent.putExtra(Constants.DATA_RESULT_KEY, receivedString)
+                LocalBroadcastManager.getInstance(this@RunWorkoutActivity).sendBroadcast(intent)
             }
         }
     }
@@ -50,16 +55,6 @@ class RunWorkoutActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        FirebaseMessaging.getInstance().token.addOnCompleteListener(OnCompleteListener { task ->
-            if (!task.isSuccessful) {
-                return@OnCompleteListener
-            }
-            // Get new FCM registration token
-            Log.e("AAAAAAAAAAAAA", "${task.result}")
-            task.result?.let {
-                exerciseViewModel.updateToken(it)
-            }
-        })
         lifecycleScope.launch {
             /** Check if we have an active exercise. If true, set our destination as the
              * Exercise Screen. If false, route to preparing a new exercise. **/

@@ -1,9 +1,9 @@
 package com.crazy_coder.everfit_wear.ui.home
 
+import android.annotation.SuppressLint
 import android.bluetooth.BluetoothAdapter
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.hardware.Sensor
 import android.os.Build
 import android.os.Bundle
 import android.os.CountDownTimer
@@ -16,9 +16,6 @@ import androidx.activity.result.contract.ActivityResultContracts.StartActivityFo
 import com.bumptech.glide.Glide
 import com.crazy_coder.everfit_wear.R
 import com.crazy_coder.everfit_wear.app.Constants
-import com.google.android.gms.wearable.MessageClient.OnMessageReceivedListener
-import com.google.android.gms.wearable.Wearable
-import com.google.android.material.snackbar.Snackbar
 import com.crazy_coder.everfit_wear.base.BaseActivity
 import com.crazy_coder.everfit_wear.data.model.DataWorkout
 import com.crazy_coder.everfit_wear.data.model.EventWorkout
@@ -28,14 +25,14 @@ import com.crazy_coder.everfit_wear.databinding.ActivityHomeBinding
 import com.crazy_coder.everfit_wear.utils.view.clicks
 import com.crazy_coder.everfit_wear.utils.view.gone
 import com.crazy_coder.everfit_wear.utils.view.show
-import com.google.android.gms.tasks.Task
-import com.google.android.gms.wearable.DataItem
+import com.google.android.gms.wearable.MessageClient.OnMessageReceivedListener
 import com.google.android.gms.wearable.Node
 import com.google.android.gms.wearable.PutDataMapRequest
 import com.google.android.gms.wearable.PutDataRequest
+import com.google.android.gms.wearable.Wearable
+import com.google.android.material.snackbar.Snackbar
 import com.google.gson.Gson
 import dagger.hilt.android.AndroidEntryPoint
-import kotlin.random.Random
 
 @AndroidEntryPoint
 class HomeActivity : BaseActivity() {
@@ -53,7 +50,7 @@ class HomeActivity : BaseActivity() {
             it
         }
     }
-    private lateinit var timer: CountDownTimer
+    private var timer: CountDownTimer? = null
     var exercise: Exercise? = null
 
     private val eventListenMessage: OnMessageReceivedListener by lazy {
@@ -116,16 +113,22 @@ class HomeActivity : BaseActivity() {
         binding.btnStartWorkout.clicks {
             exercise = exercises.random()
             val data = EventWorkout(title = exercise?.name, event = Constants.KEY_START)
-            sendEvent(data)
+            passDataWakeUpApp(data)
             startExercise(exercise ?: exercises[0])
+        }
+
+        binding.btnWakeUp.clicks {
+            exercise = exercises.random()
+            val data = EventWorkout(title = exercise?.name, event = Constants.KEY_START)
+            wakeUpApp(data)
         }
 
         binding.btnNextWorkout.clicks {
             completeExercise()
             exercise = exercises.random()
             val data = EventWorkout(title = exercise?.name, event = Constants.KEY_NEXT)
-            sendEvent(data)
             passDataWakeUpApp(data)
+            sendEvent(data)
             startExercise(exercise ?: exercises[0])
         }
         binding.btnCompleteWorkout.clicks {
@@ -136,16 +139,16 @@ class HomeActivity : BaseActivity() {
         }
         binding.btnRest.clicks {
             val data = EventWorkout(title = exercise?.name, event = Constants.KEY_REST)
-            sendEvent(data)
             passDataWakeUpApp(data)
             startRest(rests[0])
+            sendEvent(data)
         }
 
         binding.btnOffRest.clicks {
             val data = EventWorkout(title = exercise?.name, event = Constants.KEY_SKIP_REST)
-            sendEvent(data)
             passDataWakeUpApp(data)
             skipRest()
+            sendEvent(data)
         }
     }
 
@@ -213,7 +216,7 @@ class HomeActivity : BaseActivity() {
             }
 
             override fun onFinish() {
-                binding.btnStartWorkout.text = "Restart Workout"
+                binding.btnStartWorkout.text = "Start Workout"
                 binding.imvGif.visibility = View.GONE
                 binding.btnStartWorkout.isEnabled = true
             }
@@ -252,12 +255,12 @@ class HomeActivity : BaseActivity() {
 
     private fun completeExercise() {
         binding.imvGif.gone()
-        timer.cancel()
+        timer?.cancel()
     }
 
     private fun skipRest() {
         binding.imvGif.gone()
-        timer.cancel()
+        timer?.cancel()
     }
 
     companion object {
@@ -324,10 +327,34 @@ class HomeActivity : BaseActivity() {
         }
     }
 
+    @SuppressLint("VisibleForTests")
     private fun passDataWakeUpApp(event: EventWorkout) {
         val gson = Gson()
         val dataEventSend = gson.toJson(event)
         val putDataReq: PutDataRequest = PutDataMapRequest.create("/path_to_data").run {
+            dataMap.putString(Constants.DATA_RESULT_KEY, dataEventSend)  // Or any other destination
+            asPutDataRequest()
+        }
+        Wearable.getDataClient(this).putDataItem(putDataReq).addOnSuccessListener {
+            Toast.makeText(
+                this,
+                "Send data to wear",
+                Toast.LENGTH_SHORT
+            ).show()
+        }
+            .addOnFailureListener {
+                Toast.makeText(
+                    this,
+                    "Send failure: ${it.message}",
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+    }
+
+    private fun wakeUpApp(event: EventWorkout) {
+        val gson = Gson()
+        val dataEventSend = gson.toJson(event)
+        val putDataReq: PutDataRequest = PutDataMapRequest.create("/wake_up").run {
             dataMap.putString(Constants.DATA_RESULT_KEY, dataEventSend)  // Or any other destination
             asPutDataRequest()
         }

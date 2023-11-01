@@ -26,7 +26,7 @@ class MainViewModel @Inject constructor(
         repository.latestTemperature
             .onEach { _state.value = state.value.copy(temperature = it.toString()) }
             .launchIn(viewModelScope)
-        repository.latestSteps
+        repository.latestDistances
             .onEach {
                 _state.value = state.value.copy(step = it.toString())
             }.launchIn(viewModelScope)
